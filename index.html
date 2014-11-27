@@ -421,8 +421,8 @@
 			// do the drawing
 			node.traverse(function(node) {
 				var id = node.id;
-				//map[id].x = width * node.gen / depth;
-				map[id].x = width - ( 1/node.gen * width );
+				map[id].x = width * node.gen / depth;
+				//map[id].x = width - ( 1/node.gen * width );
 				map[id].y = ( map[id].post - map[id].pre ) / 2 * dist + map[id].pre * dist;
 				if ( node.parent ) {
 					var pid = node.parent.id;
