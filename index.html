@@ -1,507 +1,72 @@
 <html>
 <head>
-	<title>Brow Brow: Brownian Motion in a Browser</title>
-	<style type="text/css">
-		body, canvas {
-			background-color: black
-		}
-		label, legend {
-			color: white
-		}
-		label, input, legend {
-			font-family: Verdana, Arial, Sans Serif;
-			font-size: 10px;
-		}
-		html, body {
-			width:  100%;
-			height: 100%;
-			margin: 0px;
-			overflow: hidden;
-		}
-		.inputBox {
-			width: 150px;
-			text-align: right;
-		}
-		input {
-			width: 50px;
-		}
-		fieldset {
-			margin: 10px;
-			width: 150px;
-			border: 1px solid white;
-		}
-		#controls {
-			position: absolute;
-		}
-		svg {
-			border: 1px solid white;
-			margin: 10px;
-			width: 175px;
-			height: 500px;
-		}
-	</style>	
+    <title>Brow Brow: Brownian Motion in a Browser</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="nodelib.js"></script>
+    <script type="text/javascript" src="uilib.js"></script>
+    <script type="text/javascript" src="evolvelib.js"></script>
 </head>
 <body>
-	<div id="controls">
-		<fieldset>
-			<legend>Diversification</legend>
-			<div class="inputBox">
-				<label for="speciationRate">Speciation</label>
-				<input 
-					type="text" 
-					class="tenths" 
-					id="speciationRate" 
-					title="speciation rate" 
-					value="0.00"></input>
-			</div>	
-			<div class="inputBox">
-				<label for="extinctionRate">Extinction</label>
-				<input 
-					type="text" 
-					class="tenths" 
-					id="extinctionRate" 
-					title="extinction rate" 
-					value="0.00"></input>
-			</div>
-		</fieldset>	
-		<fieldset>
-			<legend>Mutation</legend>
-			<div class="inputBox">
-				<label for="colorHeritability">Color</label>
-				<input 
-					type="text" 
-					class="hundredths" 
-					id="colorHeritability" 
-					title="color heritability" 
-					value="0.000"></input>
-			</div>
-			<div class="inputBox">	
-				<label for="radiusHeritability">Radius</label>
-				<input 
-					type="text" 
-					class="hundredths" 
-					id="radiusHeritability" 
-					title="radius heritability" 
-					value="0.000"></input>
-			</div>
-			<div class="inputBox">	
-				<label for="positionHeritability">Position</label>
-				<input 
-					type="text" 
-					class="hundredths" 
-					id="positionHeritability" 
-					title="position heritability" 
-					value="0.000"></input>
-			</div>
-		</fieldset>
-	</div>
-	
-	<canvas id="evolver"></canvas>
-	<script type="text/javascript">
-		// generation counter	
-		var generation = 1;
-		
-		// object ID counter
-		var idCounter = 1;
-	
-		// simple node object
-		var Node = function (args) {
-		
-			// copy color or instantiate
-			if ( args && args.color ) {
-				this.color = args.color.slice(0);
-			}
-			else {
-				this.color = [ 128, 128, 128 ];
-			}
-			
-			// copy radius or instantiate
-			if ( args && args.radius ) {
-				this.radius = args.radius;
-			}
-			else {
-				this.radius = 10;
-			}
-			
-			// copy position or instantiate
-			if ( args && args.pos ) {
-				this.pos = args.pos.slice(0);
-			}
-			else {
-				this.pos = [ window.innerWidth / 2, window.innerHeight / 2 ];
-			}
-			
-			// copy generation or instantiate
-			if ( args && args.gen ) {
-				this.gen = args.gen;
-			}
-			else {
-				this.gen = 1;
-			}
-			
-			// copy children or instantiate
-			if ( args && args.children ) {
-				this.children = args.children;
-			}
-			else {
-				this.children = [];
-			}
-			
-			// copy parent
-			if ( args && args.parent ) {
-				this.parent = args.parent;
-			}
-			this.id = idCounter++;
-		};
-		Node.prototype.traverse = function(preFunc,postFunc) {
-			if ( preFunc ) {
-				preFunc(this);
-			}
-			var children = this.children;
-			for ( var i = 0; i < children.length; i++ ) {
-				children[i].traverse(preFunc,postFunc);
-			}
-			if ( postFunc ) {
-				postFunc(this);
-			}
-		};
-		Node.prototype.iterate = function(func) {
-			for ( var i = 0; i < this.children.length; i++ ) {
-				func(this.children[i]);
-			}
-		};
-		Node.prototype.getLeaves = function () {
-			var leaves = [];
-			this.traverse(function(node){
-				if ( node.isLeaf() ) {
-					leaves.push(node);
-				}
-			});
-			return leaves;
-		};
-		Node.prototype.speciate = function() {
-		
-			// create first child
-			var child1 = new Node(this);
-			child1.gen = generation;
-			child1.parent = this;
-			
-			// create second child
-			var child2 = new Node(this);
-			child2.gen = generation;
-			child2.parent = this;
-			
-			// assign children
-			this.children = [ child1, child2 ];
-			return this.children;
-		};
-		Node.prototype.extinguish = function () {
-			
-			// only non-root leaves can be extinguished
-			if ( this.parent ) {
-				var id = this.id;
-			
-				// collect the sister species, which must
-				// be re-attached to the grandparent
-				var otherChild;
-				this.parent.iterate(function(node){
-					if ( node.id != id ) {
-						otherChild = node;
-					}
-				});
-				
-				if ( this.parent.parent ) {
-					var pid = this.parent.id;
-				
-					// collect the sister of the parent
-					var otherSibling;
-					this.parent.parent.iterate(function(node){
-						if ( node.id != pid ) {
-							otherSibling = node;
-						}
-					});
-					this.parent.parent.children = [ otherChild, otherSibling ];		
-					otherChild.parent = this.parent.parent;
-					otherSibling.parent = this.parent.parent;
-					return true;			
-				}
-			}
-			return false;
-		};
-		Node.prototype.getLength = function () {
-			if ( this.parent ) {
-				return this.gen - this.parent.gen;
-			}
-			else {
-				return 0;
-			}
-		};
-		Node.prototype.getRoot = function () {
-			if ( this.parent ) {
-				var parent = this.parent;
-				while(parent) {
-					if ( parent.isRoot() ) {
-						return parent;
-					}
-					parent = parent.parent;				
-				}
-			}
-			else {
-				return this;
-			}			
-		};
-		Node.prototype.isRoot = function () {
-			if ( this.parent ) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		};
-		Node.prototype.isLeaf = function () {
-			if ( this.children.length == 0 ) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		};
-		Node.prototype.getRGB = function () {
-			return 'rgb('+this.color[0]+','+this.color[1]+','+ this.color[2]+')';
-		};
-	
-		// simple tree object
-		var Tree = function(root) {
-			if ( root ) {
-				this.root = root;
-			}
-			else {
-				this.root = new Node();
-			}
-		};
-		
-		// instantiate the root
-		var tree = new Tree();
+<div id="controls">
+    <fieldset>
+        <legend>Diversification</legend>
+        <div class="inputBox">
+            <label for="speciationRate">Speciation</label>
+            <input
+                type="text"
+                class="tenths"
+                id="speciationRate"
+                title="speciation rate"
+                value="0.00" />
+        </div>
+        <div class="inputBox">
+            <label for="extinctionRate">Extinction</label>
+            <input
+                type="text"
+                class="tenths"
+                id="extinctionRate"
+                title="extinction rate"
+                value="0.00" />
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Mutation</legend>
+        <div class="inputBox">
+            <label for="colorHeritability">Color</label>
+            <input
+                type="text"
+                class="hundredths"
+                id="colorHeritability"
+                title="color heritability"
+                value="0.000" />
+        </div>
+        <div class="inputBox">
+            <label for="radiusHeritability">Radius</label>
+            <input
+                type="text"
+                class="hundredths"
+                id="radiusHeritability"
+                title="radius heritability"
+                value="0.000" />
+        </div>
+        <div class="inputBox">
+            <label for="positionHeritability">Position</label>
+            <input
+                type="text"
+                class="hundredths"
+                id="positionHeritability"
+                title="position heritability"
+                value="0.000" />
+        </div>
+    </fieldset>
+</div>
 
-		// configure the canvas
-		var canvas = document.getElementById('evolver');
-		var ctx = canvas.getContext("2d");
-		ctx.canvas.width  = window.innerWidth;
-		ctx.canvas.height = window.innerHeight;
-		ctx.translate(0.5, 0.5);
-		
-		// configure the svg
-		var svgns = "http://www.w3.org/2000/svg";		
-		var svg = document.createElementNS(svgns, "svg");		
-		document.getElementById('controls').appendChild(svg);
-					
-		// draws from an approximately normal distribution with mean 0. to alter
-		// the stdev, multiply the output. then add the target mean. the normal
-		// distribution is approximated by adding 3 draws from uniform distributions,
-		// thereby approaching the Central Limit Theorem.
-		function rnd() {
-		    var value = (Math.random()*2-1) + (Math.random()*2-1) + (Math.random()*2-1);
-		    return value;
-		}
-		
-		// mutates a parameter
-		function mutate( value, min, max, muratSelector ) {
-			var rate = document.getElementById(muratSelector).value;
-			var stdev = ( max - min ) * ( rate );
-			var newValue = rnd() * stdev + value;
-			
-			// bounce back from upper
-			if ( newValue > max ) {
-				newValue = max - ( newValue - max );
-			}
-			
-			// bounce back from lower
-			if ( newValue < min ) {
-				newValue = min + ( min - newValue );
-			}
+<canvas id="evolver"></canvas>
+<script type="text/javascript">
 
-			return Math.round(newValue);
-		}
-
-		// evolve one generation
-		function evolve() {						
-			var leaves = tree.root.getLeaves();
-						
-			// decide whether to speciate
-			if ( Math.random() < document.getElementById('speciationRate').value ) {
-				var i = Math.floor( Math.random() * leaves.length );
-				var children = leaves[i].speciate();
-				leaves.splice(i,1);
-				leaves.push(children[0]);
-				leaves.push(children[1]);
-			}
-			
-			// decide whether to extinguish
-			if ( Math.random() < document.getElementById('extinctionRate').value ) {
-				if ( leaves.length > 1 ) {
-					var i = Math.floor( Math.random() * leaves.length );
-					if ( leaves[i].extinguish() ) {
-						leaves.splice(i,1);
-					}
-				}
-			}
-			
-			// fade the previous generation
-			ctx.beginPath();
-			ctx.rect(0,0,window.innerWidth,window.innerHeight);
-			ctx.fillStyle = 'rgba(0,0,0,0.05)';
-			ctx.fill();
-			
-			// iterate over lineages, mutate
-			for ( var i = 0; i < leaves.length; i++ ) {
-				var l = leaves[i];
-				l.gen = generation; // update 
-				
-				// mutate colors
-				l.color[0] = mutate(l.color[0],0,255,'colorHeritability');
-				l.color[1] = mutate(l.color[1],0,255,'colorHeritability');
-				l.color[2] = mutate(l.color[2],0,255,'colorHeritability');
-				
-				// mutate radius
-				l.radius = mutate(l.radius,5,40,'radiusHeritability');
-				
-				// mutate position
-				l.pos[0] = mutate(l.pos[0],0,window.innerWidth,'positionHeritability');
-				l.pos[1] = mutate(l.pos[1],0,window.innerHeight,'positionHeritability');
-				
-				// draw the lineage
-				ctx.beginPath();
-      			ctx.arc( l.pos[0], l.pos[1], l.radius, 0, 2 * Math.PI, false );
-				ctx.fillStyle = l.getRGB();
-				ctx.fill();		
-								
-				ctx.lineWidth = 0.1;
-				ctx.strokeStyle = '#000000';		
-				ctx.stroke();
-			}
-			drawTree(tree.root,generation);
-			generation++;
-		}
-		
-		// draws the current tree
-		function drawTree(node,depth) {
-
-			// clear the current tree
-			var lines = svg.getElementsByTagName('line');
-			for ( var i = 0; i < lines.length; i++ ) {
-				svg.removeChild(lines[i]);
-			}
-		
-			// dimensions to divide up
-			var width  = svg.clientWidth;
-			var height = svg.clientHeight;
-		
-			// calculate seen leaves in pre- and post-order
-			var map = {};
-			var leaves = 0;
-			node.traverse(
-			
-				// pre-order
-				function(node){
-					map[node.id] = { pre: leaves };
-					if ( node.isLeaf() ) {
-						leaves++;
-					}					
-				},
-				
-				// post-order
-				function(node){
-					map[node.id].post = leaves;				
-				}
-			);
-			
-			// distance between leaves
-			var dist = height / leaves;
-			
-			// do the drawing
-			node.traverse(function(node) {
-				var id = node.id;
-				map[id].x = width * node.gen / depth;
-				//map[id].x = width - ( 1/node.gen * width );
-				map[id].y = ( map[id].post - map[id].pre ) / 2 * dist + map[id].pre * dist;
-				if ( node.parent ) {
-					var pid = node.parent.id;
-					if ( map[pid] ) {
-					
-						// draw horizontal
-						var hline = document.createElementNS(svgns, 'line');
-						hline.setAttributeNS(null,'x1',Math.floor(map[id].x));
-						hline.setAttributeNS(null,'y1',Math.floor(map[id].y));
-						hline.setAttributeNS(null,'x2',Math.floor(map[pid].x));
-						hline.setAttributeNS(null,'y2',Math.floor(map[id].y));
-						hline.setAttributeNS(null,'stroke',node.getRGB()); 
-						hline.setAttributeNS(null,'stroke-linecap','round'); 
-						hline.setAttributeNS(null,'stroke-width','3'); 
-						svg.appendChild(hline);				     				     				    
-										
-						// draw vertical
-						var vline = document.createElementNS(svgns, 'line');
-						vline.setAttributeNS(null,'x1',Math.floor(map[pid].x));
-						vline.setAttributeNS(null,'y1',Math.floor(map[id].y));
-						vline.setAttributeNS(null,'x2',Math.floor(map[pid].x));
-						vline.setAttributeNS(null,'y2',Math.floor(map[pid].y));
-						vline.setAttributeNS(null,'stroke',node.parent.getRGB());
-						vline.setAttributeNS(null,'stroke-linecap','round'); 
-						vline.setAttributeNS(null,'stroke-width','3');  				     				    
-						svg.appendChild(vline);
- 				    }
- 				    else {
- 				    	console.log(pid);
- 				    }
-				}
-			});
-		}
-
-		setInterval(evolve,100);
-	</script>
-	<script type="text/javascript">
-	// syntax sugar to make input values increment with arrow keys
-	
-		document.onkeydown = function(e) {
-		
-			// find the input element that is focused, if any
-			var inputs = document.getElementsByTagName('input');
-			var focusInput;
-			for ( var i = 0; i < inputs.length; i++ ) {
-				if ( inputs[i] === document.activeElement ) {
-					focusInput = inputs[i];
-				}
-			}
-		
-			// proceed if any is focused
-			if ( focusInput ) {
-				var increment;
-				var decimals;
-				if ( focusInput.className === 'tenths' ) {
-					increment = 0.01;
-					decimals = 2;
-				}
-				else {
-					increment = 0.001;
-					decimals = 3;
-				}
-				var val = parseFloat(focusInput.value);
-			
-				// arrow up is pressed
-				if ( e.keyCode == '38' ) {
-					if ( focusInput.value < 1 ) {
-						focusInput.value = ( val + increment ).toFixed(decimals);
-					}
-				}
-			
-				// arrow down is pressed
-				else if ( e.keyCode == '40' ) {
-					if ( focusInput.value > 0 ) {
-						focusInput.value = ( val - increment ).toFixed(decimals);
-					}
-				}
-			}
-		};	
-	</script>
-<body>
+    // initialize the simulation
+    var e = new Evolver(new Tree(),new UI());
+    setInterval( function(){ e.evolve() }, 100 );
+</script>
+</body>
 </html>
