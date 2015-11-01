@@ -2,14 +2,17 @@
 <head>
     <title>Brow Brow: Brownian Motion in a Browser</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.js"></script>
     <script type="text/javascript" src="nodelib.js"></script>
     <script type="text/javascript" src="uilib.js"></script>
     <script type="text/javascript" src="evolvelib.js"></script>
     <script type="text/javascript">
 
         // initialize the simulation
-        var e = new Evolver(new Tree(),new UI());
-        setInterval( function(){ e.evolve() }, 100 );
+        $( document ).ready(function() {
+            var e = new Evolver(new Tree(),new UI());
+            setInterval( function(){ e.evolve() }, 100 );
+        });
         
     </script>
 </head>
