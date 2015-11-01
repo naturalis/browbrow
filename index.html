@@ -1,79 +1,78 @@
+<!doctype html>
 <html>
-<head>
-    <title>Brow Brow: Brownian Motion in a Browser</title>
-    <link rel="stylesheet" type="text/css" href="style.css" />
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.js"></script>
-    <script type="text/javascript" src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-    <script type="text/javascript" src="nodelib.js"></script>
-    <script type="text/javascript" src="uilib.js"></script>
-    <script type="text/javascript" src="evolvelib.js"></script>
-    <script type="text/javascript">
-
-        // initialize the simulation
-        $( document ).ready(function() {
-            var e = new Evolver(new Tree(),new UI());
-            setInterval( function(){ e.evolve() }, 100 );
-        });
-        
-    </script>
-</head>
-<body>
-<div id="controls">
-    <fieldset>
-        <legend>Diversification</legend>
-        <div class="inputBox">
-            <label for="speciationRate">Speciation</label>
-            <input
-                type="text"
-                class="tenths"
-                id="speciationRate"
-                title="speciation rate"
-                value="0.00" />
+    <head>
+        <title>Brow Brow: Brownian Motion in a Browser</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script type="text/javascript" src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <script type="text/javascript" src="nodelib.js"></script>
+        <script type="text/javascript" src="uilib.js"></script>
+        <script type="text/javascript" src="evolvelib.js"></script>
+        <script type="text/javascript">
+    
+            // initialize the simulation
+            $( document ).ready(function() {
+                var e = new Evolver(new Tree(),new UI());
+                setInterval( function(){ e.evolve() }, 100 );
+            });
+            
+        </script>
+    </head>
+    <body>
+        <div id="controls">
+            <fieldset>
+                <legend>Diversification</legend>
+                <div class="inputBox">
+                    <label for="speciationRate">Speciation</label>
+                    <input
+                        type="text"
+                        class="tenths"
+                        id="speciationRate"
+                        title="speciation rate"
+                        value="0.00" />
+                </div>
+                <div class="inputBox">
+                    <label for="extinctionRate">Extinction</label>
+                    <input
+                        type="text"
+                        class="tenths"
+                        id="extinctionRate"
+                        title="extinction rate"
+                        value="0.00" />
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Mutation</legend>
+                <div class="inputBox">
+                    <label for="colorHeritability">Color</label>
+                    <input
+                        type="text"
+                        class="hundredths"
+                        id="colorHeritability"
+                        title="color heritability"
+                        value="0.000" />
+                </div>
+                <div class="inputBox">
+                    <label for="radiusHeritability">Radius</label>
+                    <input
+                        type="text"
+                        class="hundredths"
+                        id="radiusHeritability"
+                        title="radius heritability"
+                        value="0.000" />
+                </div>
+                <div class="inputBox">
+                    <label for="positionHeritability">Position</label>
+                    <input
+                        type="text"
+                        class="hundredths"
+                        id="positionHeritability"
+                        title="position heritability"
+                        value="0.000" />
+                </div>
+            </fieldset>
         </div>
-        <div class="inputBox">
-            <label for="extinctionRate">Extinction</label>
-            <input
-                type="text"
-                class="tenths"
-                id="extinctionRate"
-                title="extinction rate"
-                value="0.00" />
-        </div>
-    </fieldset>
-    <fieldset>
-        <legend>Mutation</legend>
-        <div class="inputBox">
-            <label for="colorHeritability">Color</label>
-            <input
-                type="text"
-                class="hundredths"
-                id="colorHeritability"
-                title="color heritability"
-                value="0.000" />
-        </div>
-        <div class="inputBox">
-            <label for="radiusHeritability">Radius</label>
-            <input
-                type="text"
-                class="hundredths"
-                id="radiusHeritability"
-                title="radius heritability"
-                value="0.000" />
-        </div>
-        <div class="inputBox">
-            <label for="positionHeritability">Position</label>
-            <input
-                type="text"
-                class="hundredths"
-                id="positionHeritability"
-                title="position heritability"
-                value="0.000" />
-        </div>
-    </fieldset>
-</div>
-
-<canvas id="evolver"></canvas>
-
-</body>
+        <canvas id="evolver"></canvas>
+    </body>
 </html>
