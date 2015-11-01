@@ -5,6 +5,13 @@
     <script type="text/javascript" src="nodelib.js"></script>
     <script type="text/javascript" src="uilib.js"></script>
     <script type="text/javascript" src="evolvelib.js"></script>
+    <script type="text/javascript">
+
+        // initialize the simulation
+        var e = new Evolver(new Tree(),new UI());
+        setInterval( function(){ e.evolve() }, 100 );
+        
+    </script>
 </head>
 <body>
 <div id="controls">
@@ -62,11 +69,6 @@
 </div>
 
 <canvas id="evolver"></canvas>
-<script type="text/javascript">
 
-    // initialize the simulation
-    var e = new Evolver(new Tree(),new UI());
-    setInterval( function(){ e.evolve() }, 100 );
-</script>
 </body>
 </html>
