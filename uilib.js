@@ -1,12 +1,17 @@
 var UI = function() {
 
-    // configure the canvas
-    var canvas = document.getElementById('evolver');
-    this.ctx = canvas.getContext("2d");
+    // configure the evolver canvas
+    var evolverCanvas = document.getElementById('evolver');
+    this.ctx = evolverCanvas.getContext("2d");
     this.ctx.canvas.width  = window.innerWidth;
     this.ctx.canvas.height = window.innerHeight;
     this.ctx.translate(0.5, 0.5);
-    console.log("Configured canvas context");
+    console.log("Configured evolver canvas context");
+
+    // configure the heatmap canvas
+    var heatmapCanvas = document.getElementById('heatmap');
+    this.configHeatmap(heatmapCanvas,evolverCanvas);
+    console.log("Configured heatmap canvas context");
 
     // configure the svg
     this.svgns = "http://www.w3.org/2000/svg";
@@ -17,6 +22,64 @@ var UI = function() {
     // syntax sugar to make input values increment with arrow keys
     document.onkeydown = this.incrementor;
     console.log("Added in-/decrement syntax sugar");
+};
+
+UI.prototype.configHeatmap = function (canvas,surface) {
+    var heatmap = createWebGLHeatmap({canvas: canvas, intensityToAlpha:true});
+    document.body.appendChild(heatmap.canvas);
+
+    // callback to paint heatmap peaks
+    var paintAtCoord = function(x, y){
+        var count = 0;
+        while(count < 200){
+            var xoff = Math.random()*2-1;
+            var yoff = Math.random()*2-1;
+            var l = xoff*xoff + yoff*yoff;
+            if(l > 1){
+                continue;
+            }
+            var ls = Math.sqrt(l);
+            xoff/=ls; yoff/=ls;
+            xoff*=1-l; yoff*=1-l;
+            count += 1;
+            heatmap.addPoint(x+xoff*50, y+yoff*50, 30, 2/300);
+        }
+    };
+
+    // event handling
+    var onTouchMove = function(evt){
+        evt.preventDefault();
+        var touches = evt.changedTouches;
+        for(var i=0; i<touches.length; i++){
+            var touch = touches[i];
+            paintAtCoord(touch.pageX, touch.pageY);
+        }
+    };
+    surface.addEventListener("touchmove", onTouchMove, false);
+    surface.onmousemove = function(event){
+        var x = event.offsetX || event.clientX;
+        var y = event.offsetY || event.clientY;
+        paintAtCoord(x, y);
+    };
+    surface.onclick = function(){
+        heatmap.clear();
+    };
+
+    // vendor prefix handling
+    var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+    var update = function(){
+        //heatmap.addPoint(100, 100, 100, 10/255);
+        heatmap.adjustSize(); // can be commented out for statically sized heatmaps, resize clears the map
+        heatmap.update(); // adds the buffered points
+        heatmap.display(); // adds the buffered points
+        //heatmap.multiply(0.9995);
+        //heatmap.blur();
+        //heatmap.clamp(0.0, 1.0); // depending on usecase you might want to clamp it
+        raf(update);
+    };
+    raf(update);
 };
 
 UI.prototype.incrementor = function (e) {
@@ -61,10 +124,12 @@ UI.prototype.incrementor = function (e) {
 };
 
 UI.prototype.fade = function() {
-    this.ctx.beginPath();
-    this.ctx.rect(0,0,window.innerWidth,window.innerHeight);
-    this.ctx.fillStyle = 'rgba(0,0,0,0.05)';
-    this.ctx.fill();
+    var imgData = this.ctx.getImageData(0,0,window.innerWidth,window.innerHeight);
+    var pix = imgData.data;
+    for ( var i = 0; i < pix.length; i += 4 ) {
+        pix[i+3] *= 0.9;
+    }
+    this.ctx.putImageData(imgData,0,0);
 };
 
 UI.prototype.getParam = function(id) {
