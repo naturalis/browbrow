@@ -178,6 +178,27 @@ Node.prototype.getRGB = function () {
     return 'rgb('+this.color[0]+','+this.color[1]+','+ this.color[2]+')';
 };
 
+Node.prototype.getTraitValue = function (trait) {
+    if ( trait == 'radius' ) {
+        return this.radius;
+    }
+    else if ( trait == 'pos_x' ) {
+        return this.pos[0];
+    }
+    else if ( trait == 'pos_y' ) {
+        return this.pos[1];
+    }
+    else if ( trait == 'color_r' ) {
+        return this.color[0];
+    }
+    else if ( trait == 'color_g' ) {
+        return this.color[1];
+    }
+    else if ( trait == 'color_b' ) {
+        return this.color[2];
+    }
+};
+
 // simple tree object
 var Tree = function(root) {
     if ( root ) {
