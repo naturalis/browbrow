@@ -120,13 +120,32 @@ Evolver.prototype.evolve = function () {
         l.radius = this.mutate(l,'radius',5,40,'radius',leaves);
 
         // mutate position
-        l.pos[0] = this.mutate(l,'pos_x',0,window.innerWidth,'position',leaves);
-        l.pos[1] = this.mutate(l,'pos_y',0,window.innerHeight,'position',leaves);
-        this.ui.getFitness(l.pos[0], l.pos[1]);
+        this.evolvePosition(l,leaves);
 
         // draw the lineage
         this.ui.drawLineage(l);
     }
     this.ui.drawTree(this.tree.root,this.generation);
     this.generation++;
+};
+
+Evolver.prototype.evolvePosition = function(l,leaves) {
+    var currentFitness = this.ui.getFitness(l.pos[0], l.pos[1]);
+    var propX = this.mutate(l,'pos_x',0,window.innerWidth,'position',leaves);
+    var propY = this.mutate(l,'pos_y',0,window.innerHeight,'position',leaves);
+    var newFitness = this.ui.getFitness(propX,propY);
+    var moves = 0;
+    while( newFitness < currentFitness || moves < 10 ) {
+        var candidateX = this.mutate(l,'pos_x',0,window.innerWidth,'position',leaves);
+        var candidateY = this.mutate(l,'pos_y',0,window.innerHeight,'position',leaves);
+        var candidateFitness = this.ui.getFitness(candidateX,candidateY);
+        if ( candidateFitness > newFitness ) {
+        	propX = candidateX;
+        	propY = candidateY;
+        }
+        newFitness = candidateFitness;
+        moves++;
+    }
+    l.pos[0] = propX;
+    l.pos[1] = propY;
 };

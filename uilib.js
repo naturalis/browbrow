@@ -73,6 +73,8 @@ UI.prototype.findxy = function (res, e) {
             if ( this.blobRadius < 160 )
                 this.blobRadius += 1;
             this.draw();
+    	    var imgData = this.landscapeCtx.getImageData(0,0,window.innerWidth,window.innerHeight);
+			this.pixels = imgData.data;            
         }
     }
 };
@@ -132,9 +134,14 @@ UI.prototype.getParam = function(id) {
 };
 
 UI.prototype.getFitness = function(x,y) {
-    var imgData = this.landscapeCtx.getImageData(x,y,1,1);
-    var pix = imgData.data;
-    return pix[3]/255;
+	if ( this.pixels ) {
+		var index = x * y * 4 + 3;  
+		var fitness = this.pixels[index]/255;      
+    	return fitness;
+    }
+    else {
+    	return 0;
+    }
 };
 
 UI.prototype.drawTree = function(node,depth) {
