@@ -40,7 +40,7 @@ Evolver.prototype.mutate = function ( individual, trait, min, max, id, competito
     // of the competition. So if the competition is ~0.0 then the inverse will be
     // infinity, hence all approaches will be accepted because they'll always we
     // smaller than infinity. If competition is ~1.0 then no approach will be accepted
-    var approach = this.approach(individual,trait,newValue,competitors);
+    var approach = this.competitionGradient(individual,trait,newValue,competitors);
     if ( ( approach < invComp ) || ( comp < Math.random() ) ) {
         return Math.round(newValue);
     }
@@ -49,7 +49,7 @@ Evolver.prototype.mutate = function ( individual, trait, min, max, id, competito
     }
 };
 
-Evolver.prototype.approach = function(individual,trait,newValue,competitors) {
+Evolver.prototype.competitionGradient = function(individual,trait,newValue,competitors) {
     var value = individual.getTraitValue(trait);
 
     // compute all distances to the old value and to the new value
@@ -122,6 +122,7 @@ Evolver.prototype.evolve = function () {
         // mutate position
         l.pos[0] = this.mutate(l,'pos_x',0,window.innerWidth,'position',leaves);
         l.pos[1] = this.mutate(l,'pos_y',0,window.innerHeight,'position',leaves);
+        this.ui.getFitness(l.pos[0], l.pos[1]);
 
         // draw the lineage
         this.ui.drawLineage(l);

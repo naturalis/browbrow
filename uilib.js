@@ -8,10 +8,18 @@ var UI = function() {
     this.ctx.translate(0.5, 0.5);
     console.log("Configured evolver canvas context");
 
-    // configure the heatmap canvas
+    // attempt to configure the heatmap canvas, might not
+    // have WebGL enabled
     var heatmapCanvas = document.getElementById('heatmap');
-    this.configHeatmap(heatmapCanvas,evolverCanvas);
-    console.log("Configured heatmap canvas context");
+    try {
+        this.configHeatmap(heatmapCanvas, evolverCanvas);
+        this.heatmap = heatmapCanvas.getContext("webgl", {preserveDrawingBuffer: true});
+        console.log("Configured heatmap canvas context");
+    }
+    catch(e) {
+        alert(e);
+        console.log(e);
+    }
 
     // configure the svg
     this.svgns = "http://www.w3.org/2000/svg";
@@ -26,6 +34,8 @@ var UI = function() {
 
 UI.prototype.configHeatmap = function (canvas,surface) {
     var heatmap = createWebGLHeatmap({canvas: canvas, intensityToAlpha:true});
+    this.buffer = heatmap.heights.vertexBufferData;
+    this.hmo = heatmap;
     document.body.appendChild(heatmap.canvas);
 
     // callback to paint heatmap peaks
@@ -134,6 +144,41 @@ UI.prototype.fade = function() {
 
 UI.prototype.getParam = function(id) {
     return document.getElementById(id).value
+};
+
+UI.prototype.getFitness = function(x,y) {
+    if ( this.heatmap ) {
+        var url = document.getElementById('heatmap').toDataURL();
+        var uintArray = Base64Binary.decode(url.replace(/^data:image\/(png|jpg);base64,/, ""));
+        var reader = new PNGReader(uintArray);
+        reader.parse(function(err, png){
+            if (err) throw err;
+            console.log(png);
+        });
+    }
+    else {
+        return 0;
+    }
+};
+
+UI.prototype.rgbToHsl = function (c){
+    var r = c[0]/255, g = c[1]/255, b = c[2]/255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+    if ( max == min ) {
+        h = s = 0; // achromatic
+    }
+    else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return new Array(h * 360, s * 100, l * 100);
 };
 
 UI.prototype.drawTree = function(node,depth) {
