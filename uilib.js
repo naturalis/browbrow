@@ -2,24 +2,27 @@ var UI = function() {
 
     // configure the evolver canvas
     var evolverCanvas = document.getElementById('evolver');
-    this.ctx = evolverCanvas.getContext("2d");
-    this.ctx.canvas.width  = window.innerWidth;
-    this.ctx.canvas.height = window.innerHeight;
-    this.ctx.translate(0.5, 0.5);
+    this.evoCtx = evolverCanvas.getContext("2d");
+    evolverCanvas.width  = window.innerWidth;
+    evolverCanvas.height = window.innerHeight;
+    this.evoCtx.translate(0.5, 0.5);
     console.log("Configured evolver canvas context");
 
     // attempt to configure the heatmap canvas, might not
     // have WebGL enabled
-    var heatmapCanvas = document.getElementById('heatmap');
-    try {
-        this.configHeatmap(heatmapCanvas, evolverCanvas);
-        this.heatmap = heatmapCanvas.getContext("webgl", {preserveDrawingBuffer: true});
-        console.log("Configured heatmap canvas context");
-    }
-    catch(e) {
-        alert(e);
-        console.log(e);
-    }
+    var self = this;
+    var landscapeCanvas = document.getElementById('landscape');
+    this.landscapeCtx = landscapeCanvas.getContext("2d");
+    landscapeCanvas.width  = window.innerWidth;
+    landscapeCanvas.height = window.innerHeight;
+    evolverCanvas.addEventListener("mousemove", function (e) {self.findxy('move',e)}, false);
+    evolverCanvas.addEventListener("mousedown", function (e) {self.findxy('down',e)}, false);
+    evolverCanvas.addEventListener("mouseup", function (e) {self.findxy('up',e)}, false);
+    evolverCanvas.addEventListener("mouseout", function (e) {self.findxy('out', e)}, false);
+    this.flag = false;
+    this.currX = 0, this.currY = 0;
+    //this.prevX = 0, this.prevY = 0;
+    this.blobRadius = 20;
 
     // configure the svg
     this.svgns = "http://www.w3.org/2000/svg";
@@ -32,64 +35,46 @@ var UI = function() {
     console.log("Added in-/decrement syntax sugar");
 };
 
-UI.prototype.configHeatmap = function (canvas,surface) {
-    var heatmap = createWebGLHeatmap({canvas: canvas, intensityToAlpha:true});
-    this.buffer = heatmap.heights.vertexBufferData;
-    this.hmo = heatmap;
-    document.body.appendChild(heatmap.canvas);
+UI.prototype.draw = function () {
+    var grd = this.landscapeCtx.createRadialGradient(
+        this.currX,
+        this.currY,
+        0,
+        this.currX,
+        this.currY,
+        this.blobRadius / 2
+    );
+    grd.addColorStop(0, "rgba(255,150,100,0.05)");
+    grd.addColorStop(1, "rgba(255,150,100,0)");
+    this.landscapeCtx.beginPath();
+    this.landscapeCtx.arc( this.currX, this.currY, this.blobRadius, 0, 2 * Math.PI, false );
+    this.landscapeCtx.fillStyle = grd;
+    this.landscapeCtx.fill();
+};
 
-    // callback to paint heatmap peaks
-    var paintAtCoord = function(x, y){
-        var count = 0;
-        while(count < 200){
-            var xoff = Math.random()*2-1;
-            var yoff = Math.random()*2-1;
-            var l = xoff*xoff + yoff*yoff;
-            if(l > 1){
-                continue;
-            }
-            var ls = Math.sqrt(l);
-            xoff/=ls; yoff/=ls;
-            xoff*=1-l; yoff*=1-l;
-            count += 1;
-            heatmap.addPoint(x+xoff*50, y+yoff*50, 30, 2/300);
+UI.prototype.findxy = function (res, e) {
+    if (res == 'down') {
+        //this.prevX = this.currX;
+        //this.prevY = this.currY;
+        this.currX = e.offsetX || e.clientX;
+        this.currY = e.offsetY || e.clientY;
+        this.flag = true;
+    }
+    if (res == 'up' || res == "out") {
+        this.flag = false;
+        this.blobRadius = 20;
+    }
+    if (res == 'move') {
+        //this.prevX = this.currX;
+        //this.prevY = this.currY;
+        this.currX = e.offsetX || e.clientX;
+        this.currY = e.offsetY || e.clientY;
+        if (this.flag) {
+            if ( this.blobRadius < 160 )
+                this.blobRadius += 1;
+            this.draw();
         }
-    };
-
-    // event handling
-    var onTouchMove = function(evt){
-        evt.preventDefault();
-        var touches = evt.changedTouches;
-        for(var i=0; i<touches.length; i++){
-            var touch = touches[i];
-            paintAtCoord(touch.pageX, touch.pageY);
-        }
-    };
-    surface.addEventListener("touchmove", onTouchMove, false);
-    surface.onmousemove = function(event){
-        var x = event.offsetX || event.clientX;
-        var y = event.offsetY || event.clientY;
-        paintAtCoord(x, y);
-    };
-    surface.onclick = function(){
-        heatmap.clear();
-    };
-
-    // vendor prefix handling
-    var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-        window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-
-    var update = function(){
-        //heatmap.addPoint(100, 100, 100, 10/255);
-        heatmap.adjustSize(); // can be commented out for statically sized heatmaps, resize clears the map
-        heatmap.update(); // adds the buffered points
-        heatmap.display(); // adds the buffered points
-        //heatmap.multiply(0.9995);
-        //heatmap.blur();
-        //heatmap.clamp(0.0, 1.0); // depending on usecase you might want to clamp it
-        raf(update);
-    };
-    raf(update);
+    }
 };
 
 UI.prototype.incrementor = function (e) {
@@ -134,12 +119,12 @@ UI.prototype.incrementor = function (e) {
 };
 
 UI.prototype.fade = function() {
-    var imgData = this.ctx.getImageData(0,0,window.innerWidth,window.innerHeight);
+    var imgData = this.evoCtx.getImageData(0,0,window.innerWidth,window.innerHeight);
     var pix = imgData.data;
     for ( var i = 0; i < pix.length; i += 4 ) {
         pix[i+3] *= 0.9;
     }
-    this.ctx.putImageData(imgData,0,0);
+    this.evoCtx.putImageData(imgData,0,0);
 };
 
 UI.prototype.getParam = function(id) {
@@ -147,38 +132,9 @@ UI.prototype.getParam = function(id) {
 };
 
 UI.prototype.getFitness = function(x,y) {
-    if ( this.heatmap ) {
-        var url = document.getElementById('heatmap').toDataURL();
-        var uintArray = Base64Binary.decode(url.replace(/^data:image\/(png|jpg);base64,/, ""));
-        var reader = new PNGReader(uintArray);
-        reader.parse(function(err, png){
-            if (err) throw err;
-            console.log(png);
-        });
-    }
-    else {
-        return 0;
-    }
-};
-
-UI.prototype.rgbToHsl = function (c){
-    var r = c[0]/255, g = c[1]/255, b = c[2]/255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
-    if ( max == min ) {
-        h = s = 0; // achromatic
-    }
-    else {
-        var d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-    return new Array(h * 360, s * 100, l * 100);
+    var imgData = this.landscapeCtx.getImageData(x,y,1,1);
+    var pix = imgData.data;
+    return pix[3]/255;
 };
 
 UI.prototype.drawTree = function(node,depth) {
@@ -259,11 +215,11 @@ UI.prototype.drawTree = function(node,depth) {
 };
 
 UI.prototype.drawLineage = function(l) {
-    this.ctx.beginPath();
-    this.ctx.arc( l.pos[0], l.pos[1], l.radius, 0, 2 * Math.PI, false );
-    this.ctx.fillStyle = l.getRGB();
-    this.ctx.fill();
-    this.ctx.lineWidth = 0.1;
-    this.ctx.strokeStyle = '#000000';
-    this.ctx.stroke();
+    this.evoCtx.beginPath();
+    this.evoCtx.arc( l.pos[0], l.pos[1], l.radius, 0, 2 * Math.PI, false );
+    this.evoCtx.fillStyle = l.getRGB();
+    this.evoCtx.fill();
+    this.evoCtx.lineWidth = 0.1;
+    this.evoCtx.strokeStyle = '#000000';
+    this.evoCtx.stroke();
 };
