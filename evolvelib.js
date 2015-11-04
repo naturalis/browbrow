@@ -111,6 +111,25 @@ Evolver.prototype.evolve = function () {
         var l = leaves[i];
         l.gen = this.generation; // update
 
+        /*
+        What needs to happen here?
+
+        1. make it so that for every trait we survey all the directions
+           in which we can evolve, i.e. any moves in the direction of
+           a competing population are disallowed, we only retain a set
+           of all possible moves.
+
+        2. among the possible, non-competing moves, assess which of these
+           might cause a reduction in fitness (for now this only applies
+           to positions on the canvas) and disallow these moves.
+
+        3. for the remaining moves, randomly draw one. Presumably every
+           move (in euclidean space, in HSL space, in "radius space") can
+           be rephrased as a directional vector so that we not only draw
+           which vector to use (uniformly) but also the vector length.
+
+         */
+
         // mutate colors
         l.color[0] = this.mutate(l,'color_r',0,255,'color',leaves);
         l.color[1] = this.mutate(l,'color_g',0,255,'color',leaves);
