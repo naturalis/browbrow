@@ -8,8 +8,7 @@ var UI = function() {
     this.evoCtx.translate(0.5, 0.5);
     console.log("Configured evolver canvas context");
 
-    // attempt to configure the heatmap canvas, might not
-    // have WebGL enabled
+    // configure the fitness landscape canvas
     var self = this;
     var landscapeCanvas = document.getElementById('landscape');
     this.landscapeCtx = landscapeCanvas.getContext("2d");
@@ -21,7 +20,6 @@ var UI = function() {
     evolverCanvas.addEventListener("mouseout", function (e) {self.findxy('out', e)}, false);
     this.flag = false;
     this.currX = 0, this.currY = 0;
-    //this.prevX = 0, this.prevY = 0;
     this.blobRadius = 20;
 
     // configure the svg
@@ -54,8 +52,6 @@ UI.prototype.draw = function () {
 
 UI.prototype.findxy = function (res, e) {
     if (res == 'down') {
-        //this.prevX = this.currX;
-        //this.prevY = this.currY;
         this.currX = e.offsetX || e.clientX;
         this.currY = e.offsetY || e.clientY;
         this.flag = true;
@@ -65,8 +61,6 @@ UI.prototype.findxy = function (res, e) {
         this.blobRadius = 20;
     }
     if (res == 'move') {
-        //this.prevX = this.currX;
-        //this.prevY = this.currY;
         this.currX = e.offsetX || e.clientX;
         this.currY = e.offsetY || e.clientY;
         if (this.flag) {
