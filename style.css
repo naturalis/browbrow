@@ -46,8 +46,12 @@ fieldset {
     z-index: 2;
 }
 svg {
-	border: 1px solid white;
-	margin: 10px;
-	width: 175px;
-	height: 500px;
+    border: 1px solid white;
+    margin: 10px;
+    width: 175px;
+    height: 500px;
+}
+.ui-slider-handle {
+    width: 1em !important;
+    height: 1em !important;
 }
