@@ -24,8 +24,8 @@ var UI = function() {
 
     // configure the svg
     this.svgns = "http://www.w3.org/2000/svg";
-    this.svg = document.createElementNS(this.svgns, "svg");
-    document.getElementById('controls').appendChild(this.svg);
+    this.svg = document.getElementById("svg");
+    //document.getElementById('controls').appendChild(this.svg);
     console.log("Instantiated SVG");
 
     // syntax sugar to turn text inputs into sliders
@@ -43,7 +43,7 @@ var UI = function() {
     		step: increments
     	});
     }
-    $("#controls").accordion();
+    $("#controls").accordion({ collapsible: true, active: false });
 };
 
 /**

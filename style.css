@@ -2,11 +2,11 @@ body {
 	background-color: black
 }
 label, legend {
-	color: white
+	//color: white
 }
-label, input, legend {
+label, input, legend, h3 {
 	font-family: Verdana, Arial, Sans Serif;
-	font-size: 10px;
+	font-size: 10px !important;
 }
 html, body {
 	width:  100%;
@@ -48,7 +48,7 @@ fieldset {
 }
 svg {
     border: 1px solid white;
-    margin: 10px;
-    width: 175px;
-    height: 500px;
+    //margin: 10px;
+    width: 150px;
+    height: 400px;
 }
