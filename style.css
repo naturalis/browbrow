@@ -52,12 +52,3 @@ svg {
     width: 175px;
     height: 500px;
 }
-
-.ui-slider .ui-slider-handle {
-    cursor: default;
-    height: 0.6em !important;
-    position: absolute;
-    width: 0.6em !important;
-    z-index: 2;
-}
-
