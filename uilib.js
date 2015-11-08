@@ -31,6 +31,7 @@ var UI = function() {
     // syntax sugar to make input values increment with arrow keys
     document.onkeydown = this.incrementor;
     console.log("Added in-/decrement syntax sugar");
+    var controls = $('#controls');
 };
 
 /**
