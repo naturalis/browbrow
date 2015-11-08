@@ -25,6 +25,7 @@ fieldset {
 	margin: 10px;
 	width: 150px;
 	border: 1px solid white;
+	padding: 10px;
 }
 #controls {
 	position: absolute;
