@@ -1,7 +1,7 @@
 var UI = function() {
 
     // configure the evolver canvas
-    var evolverCanvas = $('#evolver');
+    var evolverCanvas = document.getElementById('evolver');
     this.evoCtx = evolverCanvas.getContext("2d");
     evolverCanvas.width  = window.innerWidth;
     evolverCanvas.height = window.innerHeight;
@@ -10,7 +10,7 @@ var UI = function() {
 
     // configure the fitness landscape canvas
     var self = this;
-    var landscapeCanvas = $('#landscape');
+    var landscapeCanvas = document.getElementById('landscape');
     this.landscapeCtx = landscapeCanvas.getContext("2d");
     landscapeCanvas.width  = window.innerWidth;
     landscapeCanvas.height = window.innerHeight;
@@ -25,7 +25,7 @@ var UI = function() {
     // configure the svg
     this.svgns = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(this.svgns, "svg");
-    $('#controls').appendChild(this.svg);
+    document.getElementById('controls').appendChild(this.svg);
     console.log("Instantiated SVG");
 
     // syntax sugar to make input values increment with arrow keys
