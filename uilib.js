@@ -28,8 +28,7 @@ var UI = function() {
     document.getElementById('controls').appendChild(this.svg);
     console.log("Instantiated SVG");
 
-    // syntax sugar to make input values increment with arrow keys
-    //document.onkeydown = this.incrementor;
+    // syntax sugar to turn text inputs into sliders
     console.log("Added in-/decrement syntax sugar");
     var inputs = $('input');
     for ( var i = 0; i < inputs.length; i++ ) {
@@ -44,6 +43,7 @@ var UI = function() {
     		step: increments
     	});
     }
+    $("#controls").accordion();
 };
 
 /**
