@@ -1,7 +1,7 @@
 var UI = function() {
 
     // configure the evolver canvas
-    var evolverCanvas = document.getElementById('evolver');
+    var evolverCanvas = $('#evolver');
     this.evoCtx = evolverCanvas.getContext("2d");
     evolverCanvas.width  = window.innerWidth;
     evolverCanvas.height = window.innerHeight;
@@ -10,7 +10,7 @@ var UI = function() {
 
     // configure the fitness landscape canvas
     var self = this;
-    var landscapeCanvas = document.getElementById('landscape');
+    var landscapeCanvas = $('#landscape');
     this.landscapeCtx = landscapeCanvas.getContext("2d");
     landscapeCanvas.width  = window.innerWidth;
     landscapeCanvas.height = window.innerHeight;
@@ -25,13 +25,23 @@ var UI = function() {
     // configure the svg
     this.svgns = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(this.svgns, "svg");
-    document.getElementById('controls').appendChild(this.svg);
+    $('#controls').appendChild(this.svg);
     console.log("Instantiated SVG");
 
     // syntax sugar to make input values increment with arrow keys
-    document.onkeydown = this.incrementor;
+    //document.onkeydown = this.incrementor;
     console.log("Added in-/decrement syntax sugar");
-    var controls = $('#controls');
+    var inputs = $('input');
+    for ( var i = 0; i < inputs.length; i++ ) {
+    	var increments = inputs[i].hasClass('tenths') ? 0.01 : 0.001;
+    	inputs[i].removeAttr('type');
+    	inputs[i].tagName = 'div';
+    	inputs[i].slider({
+    		min: 0,
+    		max: 1,
+    		step: increments
+    	});
+    }
 };
 
 /**
@@ -192,7 +202,8 @@ UI.prototype.fade = function() {
 };
 
 UI.prototype.getParam = function(id) {
-    return document.getElementById(id).value
+    //return document.getElementById(id).value
+    return $('#'+id).slider('value');
 };
 
 UI.prototype.getFitness = function(x,y) {
