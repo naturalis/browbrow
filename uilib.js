@@ -34,11 +34,13 @@ var UI = function() {
     var inputs = $('input');
     for ( var i = 0; i < inputs.length; i++ ) {
     	var increments = inputs[i].className === 'tenths' ? 0.01 : 0.001;
-    	var id = inputs[i].id;
+    	var id  = inputs[i].id;
+    	var min = $(inputs[i]).attr('min');
+    	var max = $(inputs[i]).attr('max');
     	$(inputs[i]).replaceWith('<div id="'+id+'">');
     	$('#'+id).slider({
-    		min: 0,
-    		max: 1,
+    		min: min,
+    		max: max,
     		step: increments
     	});
     }
