@@ -54,6 +54,8 @@ svg {
 .ui-slider-handle {
     width: 0.6em !important;
     height: 0.6em !important;
+    margin-left: 0em !important;
+    top: -.15em !important;
 }
 .ui-slider-horizontal {
     height: 0.4em !important;
