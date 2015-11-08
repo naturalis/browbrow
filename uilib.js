@@ -34,8 +34,9 @@ var UI = function() {
     var inputs = $('input');
     for ( var i = 0; i < inputs.length; i++ ) {
     	var increments = inputs[i].className === 'tenths' ? 0.01 : 0.001;
-    	inputs[i].tagName = 'div';
-    	$(inputs[i]).slider({
+    	var id = inputs[i].id;
+    	$(inputs[i]).replaceWith('<div id="'+id+'">');
+    	$('#'+id).slider({
     		min: 0,
     		max: 1,
     		step: increments
