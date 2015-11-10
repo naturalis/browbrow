@@ -46,6 +46,27 @@ var UI = function() {
     $("#controls").accordion({ collapsible: true, active: false });
 };
 
+UI.prototype.drawLandscape = function(ctx){
+	var image = ctx.createImageData(canvas.width, canvas.height);
+	var data = image.data;
+	noise.seed(Math.random());
+	for ( var x = 0; x < canvas.width; x++ ) {
+		for ( var y = 0; y < canvas.height; y++ ) {
+			var value = Math.abs(noise.simplex2(x / 500, y / 500));
+			value *= 256;
+			var cell = (x + y * canvas.width) * 4;
+			data[cell] = data[cell + 1] = data[cell + 2] = value;
+			data[cell + 3] = 255; // alpha.
+		}
+	}	
+	ctx.fillColor = 'black';
+	ctx.fillRect(0, 0, 100, 100);
+	ctx.putImageData(image, 0, 0);
+	if(console) {
+	  console.log('Rendered in ' + (end - start) + ' ms');
+	}
+};
+
 /**
  * Converts an HSL color value to RGB. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
