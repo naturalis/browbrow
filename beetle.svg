@@ -190,7 +190,7 @@
 				<animateTransform
 					attributeName="transform"
 					begin="0s"
-					dur="1s"
+					dur="0.5s"
 					type="rotate"
 					from="20 85.4 100.793"
 					to="-20 85.4 100.793"
@@ -205,7 +205,7 @@
 					<animateTransform
 						attributeName="transform"
 						begin="0s"
-						dur="1s"
+						dur="0.5s"
 						type="rotate"
 						from="-20 81.527 89.883"
 						to="30 81.527 89.883"
@@ -233,7 +233,7 @@
 				<animateTransform
 					attributeName="transform"
 					begin="0s"
-					dur="1s"
+					dur="0.5s"
 					type="rotate"
 					from="30 82.662 120.239"
 					to="-30 82.662 120.239"
@@ -245,7 +245,7 @@
 					<animateTransform
 						attributeName="transform"
 						begin="0s"
-						dur="1s"
+						dur="0.5s"
 						type="rotate"
 						from="-30 77.636 123.444l"
 						to="40 77.636 123.444l"
@@ -272,7 +272,7 @@
 				<animateTransform
 					attributeName="transform"
 					begin="0s"
-					dur="1s"
+					dur="0.5s"
 					type="rotate"
 					from="-20 108.678 107.491"
 					to="20 108.678 107.491"
@@ -304,8 +304,8 @@
 			<g id="leg2">
 				<animateTransform
 					attributeName="transform"
-					begin="0.5s"
-					dur="1s"
+					begin="0.25s"
+					dur="0.5s"
 					type="rotate"
 					from="20 85.297 107.268"
 					to="-20 85.297 107.268"
@@ -339,8 +339,8 @@
 			<g id="leg4">
 				<animateTransform
 					attributeName="transform"
-					begin="0.5s"
-					dur="1s"
+					begin="0.25s"
+					dur="0.5s"
 					type="rotate"
 					from="-20 104.994 102.947"
 					to="20 104.994 102.947"
@@ -354,8 +354,8 @@
 				<g>
 					<animateTransform
 						attributeName="transform"
-						begin="0.5s"
-						dur="1s"
+						begin="0.25s"
+						dur="0.5s"
 						type="rotate"
 						from="20 112.493 91.029"
 						to="-30 112.493 91.029"
@@ -382,8 +382,8 @@
 			<g id="leg6">
 				<animateTransform
 					attributeName="transform"
-					begin="0.5s"
-					dur="1s"
+					begin="0.25s"
+					dur="0.5s"
 					type="rotate"
 					from="-30 110.032 119.814"
 					to="30 110.032 119.814"
@@ -394,8 +394,8 @@
 				<g>	
 					<animateTransform
 						attributeName="transform"
-						begin="0.5s"
-						dur="1s"
+						begin="0.25s"
+						dur="0.5s"
 						type="rotate"
 						from="30 115.058 123.02"
 						to="-40 115.058 123.02"
