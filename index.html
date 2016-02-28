@@ -23,31 +23,6 @@
     <body>
         <canvas id="landscape"></canvas>
         <div id="controls">
-            <h3>Diversification</h3>
-            <div>
-                <div class="inputBox">
-                    <label for="speciationRate">Speciation</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.1"
-                        class="tenths"
-                        id="speciationRate"
-                        title="speciation rate"
-                        value="0.00" />
-                </div>
-                <div class="inputBox">
-                    <label for="extinctionRate">Extinction</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.1"
-                        class="tenths"
-                        id="extinctionRate"
-                        title="extinction rate"
-                        value="0.00" />
-                </div>
-            </div>
             <h3>Mutation</h3>
             <div>
                 <div class="inputBox">
@@ -83,6 +58,31 @@
                         title="position heritability"
                         value="0.000" />
                 </div>
+            </div>
+            <h3>Habitat</h3>
+            <div>
+            	<div class="inputBox">
+            		<label for="patchiness">Patch size</label>
+                    <input
+                        type="text"
+                        min="100"
+                        max="1000"
+                        class="ones"
+                        id="patchiness"
+                        title="patchiness"
+                        value="100" />            		
+            	</div>
+            	<div class="inputBox">
+            		<label for="habitatColors">Patch colors</label>
+                    <input
+                        type="text"
+                        min="1"
+                        max="5"
+                        class="ones"                        
+                        id="habitatColors"
+                        title="habitat colors"
+                        value="1" />             		
+            	</div>
             </div>
             <h3>Competition</h3>
             <div>
@@ -120,9 +120,31 @@
                         value="0.00" />
                 </div>
             </div>
-            <h3>Phylogeny</h3>
+            <h3>Diversification</h3>
             <div>
-            	<svg id="svg"></svg>
+                <div class="inputBox">
+                    <label for="speciationRate">Speciation</label>
+                    <input
+                        type="text"
+                        min="0"
+                        max="0.1"
+                        class="tenths"
+                        id="speciationRate"
+                        title="speciation rate"
+                        value="0.00" />
+                </div>
+                <div class="inputBox">
+                    <label for="extinctionRate">Extinction</label>
+                    <input
+                        type="text"
+                        min="0"
+                        max="0.1"
+                        class="tenths"
+                        id="extinctionRate"
+                        title="extinction rate"
+                        value="0.00" />
+                </div>
+                <svg id="svg"></svg>
             </div>
         </div>
         <canvas id="evolver"></canvas>

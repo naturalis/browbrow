@@ -8,31 +8,18 @@ var UI = function() {
     this.evoCtx.translate(0.5, 0.5);
     console.log("Configured evolver canvas context");
 
-    // configure the fitness landscape canvas
-    var self = this;
-    var landscapeCanvas = document.getElementById('landscape');
-    this.landscapeCtx = landscapeCanvas.getContext("2d");
-    landscapeCanvas.width  = window.innerWidth;
-    landscapeCanvas.height = window.innerHeight;
-    evolverCanvas.addEventListener("mousemove", function (e) {self.findxy('move',e)}, false);
-    evolverCanvas.addEventListener("mousedown", function (e) {self.findxy('down',e)}, false);
-    evolverCanvas.addEventListener("mouseup", function (e) {self.findxy('up',e)}, false);
-    evolverCanvas.addEventListener("mouseout", function (e) {self.findxy('out', e)}, false);
-    this.flag = false;
-    this.currX = 0, this.currY = 0;
-    this.blobRadius = 20;
-
     // configure the svg
     this.svgns = "http://www.w3.org/2000/svg";
     this.svg = document.getElementById("svg");
-    //document.getElementById('controls').appendChild(this.svg);
     console.log("Instantiated SVG");
 
-    // syntax sugar to turn text inputs into sliders
+    // turn text inputs into sliders
     console.log("Added in-/decrement syntax sugar");
     var inputs = $('input');
     for ( var i = 0; i < inputs.length; i++ ) {
     	var increments = inputs[i].className === 'tenths' ? 0.01 : 0.001;
+    	if ( inputs[i].className === 'ones' ) 
+	    	increments = 1;
     	var id  = inputs[i].id;
     	var min = parseFloat($(inputs[i]).attr('min'));
     	var max = parseFloat($(inputs[i]).attr('max'));
@@ -43,16 +30,32 @@ var UI = function() {
     		step: increments
     	});
     }
+    
+    // add callbacks to landscape sliders
+    var lsc = [ '#patchiness', '#habitatColors' ];
+    var landscapeCanvas = document.getElementById('landscape');
+    var self = this;
+    landscapeCanvas.width  = window.innerWidth;
+    landscapeCanvas.height = window.innerHeight;    
+    var ctx = landscapeCanvas.getContext("2d");
+    for ( var i = 0; i < 2; i++ ) {
+    	$(lsc[i]).on("slidechange",function(event,ui){
+    		self.drawLandscape(landscapeCanvas,ctx)
+    	});
+    }
+    
+    // collect all controls in an accordion
     $("#controls").accordion({ collapsible: true, active: false });
 };
 
-UI.prototype.drawLandscape = function(ctx){
+UI.prototype.drawLandscape = function(canvas,ctx){
 	var image = ctx.createImageData(canvas.width, canvas.height);
 	var data = image.data;
 	noise.seed(Math.random());
+	var scale = this.getParam('patchiness');
 	for ( var x = 0; x < canvas.width; x++ ) {
 		for ( var y = 0; y < canvas.height; y++ ) {
-			var value = Math.abs(noise.simplex2(x / 500, y / 500));
+			var value = Math.abs(noise.simplex2(x / scale, y / scale));
 			value *= 256;
 			var cell = (x + y * canvas.width) * 4;
 			data[cell] = data[cell + 1] = data[cell + 2] = value;
@@ -62,9 +65,6 @@ UI.prototype.drawLandscape = function(ctx){
 	ctx.fillColor = 'black';
 	ctx.fillRect(0, 0, 100, 100);
 	ctx.putImageData(image, 0, 0);
-	if(console) {
-	  console.log('Rendered in ' + (end - start) + ' ms');
-	}
 };
 
 /**
@@ -134,87 +134,6 @@ UI.prototype.drawLandscape = function(ctx){
     return [h, s, l];
 };
 
-UI.prototype.draw = function () {
-    var grd = this.landscapeCtx.createRadialGradient(
-        this.currX,
-        this.currY,
-        0,
-        this.currX,
-        this.currY,
-        this.blobRadius / 2
-    );
-    grd.addColorStop(0, "rgba(255,150,100,0.05)");
-    grd.addColorStop(1, "rgba(255,150,100,0)");
-    this.landscapeCtx.beginPath();
-    this.landscapeCtx.arc( this.currX, this.currY, this.blobRadius, 0, 2 * Math.PI, false );
-    this.landscapeCtx.fillStyle = grd;
-    this.landscapeCtx.fill();
-};
-
-UI.prototype.findxy = function (res, e) {
-    if (res == 'down') {
-        this.currX = e.offsetX || e.clientX;
-        this.currY = e.offsetY || e.clientY;
-        this.flag = true;
-    }
-    if (res == 'up' || res == "out") {
-        this.flag = false;
-        this.blobRadius = 20;
-    }
-    if (res == 'move') {
-        this.currX = e.offsetX || e.clientX;
-        this.currY = e.offsetY || e.clientY;
-        if (this.flag) {
-            if ( this.blobRadius < 160 )
-                this.blobRadius += 1;
-            this.draw();
-    	    var imgData = this.landscapeCtx.getImageData(0,0,window.innerWidth,window.innerHeight);
-			this.pixels = imgData.data;            
-        }
-    }
-};
-
-UI.prototype.incrementor = function (e) {
-
-    // find the input element that is focused, if any
-    var inputs = document.getElementsByTagName('input');
-    var focusInput;
-    for ( var i = 0; i < inputs.length; i++ ) {
-        if ( inputs[i] === document.activeElement ) {
-            focusInput = inputs[i];
-        }
-    }
-
-    // proceed if any is focused
-    if ( focusInput ) {
-        var increment;
-        var decimals;
-        if ( focusInput.className === 'tenths' ) {
-            increment = 0.01;
-            decimals = 2;
-        }
-        else {
-            increment = 0.001;
-            decimals = 3;
-        }
-        var val = parseFloat(focusInput.value);
-
-        // arrow up is pressed
-        if ( e.keyCode == '38' ) {
-            if ( focusInput.value < 1 ) {
-                focusInput.value = ( val + increment ).toFixed(decimals);
-            }
-        }
-
-        // arrow down is pressed
-        else if ( e.keyCode == '40' ) {
-            if ( focusInput.value > 0 ) {
-                focusInput.value = ( val - increment ).toFixed(decimals);
-            }
-        }
-    }
-};
-
 UI.prototype.fade = function() {
     var imgData = this.evoCtx.getImageData(0,0,window.innerWidth,window.innerHeight);
     var pix = imgData.data;
@@ -225,7 +144,6 @@ UI.prototype.fade = function() {
 };
 
 UI.prototype.getParam = function(id) {
-    //return document.getElementById(id).value
     return $('#'+id).slider('value');
 };
 
