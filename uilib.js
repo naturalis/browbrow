@@ -40,7 +40,8 @@ var UI = function() {
     var ctx = landscapeCanvas.getContext("2d");
     for ( var i = 0; i < 2; i++ ) {
     	$(lsc[i]).on("slidechange",function(event,ui){
-    		self.drawLandscape(landscapeCanvas,ctx)
+    		self.drawLandscape(landscapeCanvas,ctx);
+    		self.colorLandscape(landscapeCanvas,ctx);
     	});
     }
     
@@ -58,14 +59,86 @@ UI.prototype.drawLandscape = function(canvas,ctx){
 			var value = Math.abs(noise.simplex2(x / scale, y / scale));
 			value *= 256;
 			var cell = (x + y * canvas.width) * 4;
-			data[cell] = data[cell + 1] = data[cell + 2] = value;
-			data[cell + 3] = 255; // alpha.
+			data[cell + 0] = data[cell + 1] = data[cell + 2] = value;
+			data[cell + 3] = 255; // alpha.			
 		}
 	}	
 	ctx.fillColor = 'black';
 	ctx.fillRect(0, 0, 100, 100);
 	ctx.putImageData(image, 0, 0);
 };
+
+UI.prototype.colorLandscape = function(canvas,ctx){
+
+};
+
+UI.prototype.colorArea = function(canvas,ctx,startX,startY,rgb){
+
+    // adapted from http://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
+	var canvasWidth = canvas.width;
+	var canvasHeight = canvas.height;
+    var colorLayer = ctx.getImageData(0,0,canvasWidth,canvasHeight);
+    var drawingBoundTop = 0;
+	var pixelStack = [[startX, startY]];
+	while(pixelStack.length) {
+		var newPos, x, y, pixelPos, reachLeft, reachRight;
+		newPos = pixelStack.pop();
+		x = newPos[0];
+		y = newPos[1];
+  		pixelPos = (y*canvasWidth + x) * 4;
+		while( y-- >= drawingBoundTop && matchStartColor(pixelPos) ) {
+			pixelPos -= canvasWidth * 4;
+		}
+		pixelPos += canvasWidth * 4;
+		++y;
+		reachLeft = false;
+		reachRight = false;
+		while( y++ < canvasHeight - 1 && matchStartColor(pixelPos) ){
+			colorPixel(pixelPos);
+			if( x > 0 ) {
+				if( matchStartColor(pixelPos - 4) ) {
+					if( !reachLeft ) {
+						pixelStack.push( [ x - 1, y ] );
+						reachLeft = true;
+					}
+				}
+				else if(reachLeft) {
+					reachLeft = false;
+				}
+			}	
+			if( x < canvasWidth - 1 ) {
+				if( matchStartColor( pixelPos + 4 ) ) {
+					if( !reachRight ) {
+						pixelStack.push([x + 1, y]);
+						reachRight = true;
+					}
+				}
+				else if(reachRight) {
+					reachRight = false;
+				}
+			}			
+			pixelPos += canvasWidth * 4;
+		}
+	}
+	ctx.putImageData(colorLayer, 0, 0);
+  
+	function matchStartColor(pixelPos) {
+		var r = colorLayer.data[pixelPos+0];
+		var g = colorLayer.data[pixelPos+1];	
+		var b = colorLayer.data[pixelPos+2];
+        return (r == 0 && g == 0 && b == 0);
+		//return (r == startR && g == startG && b == startB);
+	}
+
+	function colorPixel(pixelPos) {
+		colorLayer.data[pixelPos+0] = rgb[0];
+		colorLayer.data[pixelPos+1] = rgb[1];
+		colorLayer.data[pixelPos+2] = rgb[2];
+		colorLayer.data[pixelPos+3] = 255;
+	}
+
+};
+
 
 /**
  * Converts an HSL color value to RGB. Conversion formula
