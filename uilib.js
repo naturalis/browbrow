@@ -38,6 +38,7 @@ var UI = function() {
     landscapeCanvas.width  = window.innerWidth;
     landscapeCanvas.height = window.innerHeight;    
     var ctx = landscapeCanvas.getContext("2d");
+    this.landscapeCtx = ctx;
     for ( var i = 0; i < 2; i++ ) {
     	$(lsc[i]).on("slidechange",function(event,ui){
     		self.drawLandscape(landscapeCanvas,ctx);
@@ -258,15 +259,14 @@ UI.prototype.getParam = function(id) {
     return $('#'+id).slider('value');
 };
 
-UI.prototype.getFitness = function(x,y) {
-	if ( this.pixels ) {
-		var index = x * y * 4 + 3;  
-		var fitness = this.pixels[index]/255;      
-    	return fitness;
-    }
-    else {
-    	return 0;
-    }
+UI.prototype.getPixelValue = function(x,y) {
+    var imageData = this.landscapeCtx.getImageData(x,y,1,1);
+	return [
+        imageData.data[0],
+        imageData.data[1],
+        imageData.data[2],
+        imageData.data[3]
+    ];
 };
 
 UI.prototype.drawTree = function(node,depth) {

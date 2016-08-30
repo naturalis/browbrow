@@ -49,7 +49,22 @@ var Node = function (args) {
         this.parent = args.parent;
     }
     this.id = idCounter++;
+
+    // initialize fitness
+    this.fitness = 0;
+
     console.log("Instantiated node");
+};
+
+Node.prototype.updateFitness = function(ui) {
+    var pixel = ui.getPixelValue(this.pos[0],this.pos[1]);
+    var hslB = ui.rgbToHsl(pixel[0],pixel[1],pixel[2]); // background
+    var hslP = ui.rgbToHsl(this.color[0],this.color[1],this.color[2]); // phenotype
+    this.fitness = Math.abs(hslB[0]-hslP[0]) + Math.abs(hslB[2]-hslP[2]);
+};
+
+Node.prototype.getFitness = function () {
+    return this.fitness;
 };
 
 Node.prototype.traverse = function(preFunc,postFunc) {

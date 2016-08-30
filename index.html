@@ -23,32 +23,11 @@
     <body>
         <canvas id="landscape"></canvas>
         <div id="controls">
-            <h3>Mutation</h3>
+            <h3>Settings</h3>
             <div>
+                <!--h3>Traits</h3-->
                 <div class="inputBox">
-                    <label for="colorHeritability">Color</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.01"
-                        class="hundredths"
-                        id="colorHeritability"
-                        title="color heritability"
-                        value="0.000" />
-                </div>
-                <div class="inputBox">
-                    <label for="radiusHeritability">Radius</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.01"
-                        class="hundredths"
-                        id="radiusHeritability"
-                        title="radius heritability"
-                        value="0.000" />
-                </div>
-                <div class="inputBox">
-                    <label for="positionHeritability">Position</label>
+                    <label for="positionHeritability">Dispersal</label>
                     <input
                         type="text"
                         min="0"
@@ -58,9 +37,19 @@
                         title="position heritability"
                         value="0.000" />
                 </div>
-            </div>
-            <h3>Habitat</h3>
-            <div>
+                <div class="inputBox">
+                    <label for="speciationRate">Fertility</label>
+                    <input
+                            type="text"
+                            min="0"
+                            max="0.1"
+                            class="tenths"
+                            id="speciationRate"
+                            title="speciation rate"
+                            value="0.00" />
+                </div>
+                <!--br />
+                <h3>Habitat</h3-->
             	<div class="inputBox">
             		<label for="patchiness">Patch size</label>
                     <input
@@ -70,7 +59,7 @@
                         class="ones"
                         id="patchiness"
                         title="patchiness"
-                        value="100" />            		
+                        value="500" />
             	</div>
             	<div class="inputBox">
             		<label for="habitatColors">Patch colors</label>
@@ -83,58 +72,21 @@
                         title="habitat colors"
                         value="2" />
             	</div>
-            </div>
-            <h3>Competition</h3>
-            <div>
+                <!--br />
+                <h3>Evolution</h3-->
                 <div class="inputBox">
-                    <label for="colorCompetition">Color</label>
+                    <label for="colorHeritability">Mutation rate</label>
                     <input
-                        type="text"
-                        min="0"
-                        max="0.99"
-                        class="tenths"
-                        id="colorCompetition"
-                        title="color competition"
-                        value="0.00" />
+                            type="text"
+                            min="0"
+                            max="0.10"
+                            class="hundredths"
+                            id="colorHeritability"
+                            title="color heritability"
+                            value="0.000" />
                 </div>
                 <div class="inputBox">
-                    <label for="radiusCompetition">Radius</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.99"
-                        class="tenths"
-                        id="radiusCompetition"
-                        title="radius competition"
-                        value="0.00" />
-                </div>
-                <div class="inputBox">
-                    <label for="positionCompetition">Position</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.99"
-                        class="tenths"
-                        id="positionCompetition"
-                        title="position competition"
-                        value="0.00" />
-                </div>
-            </div>
-            <h3>Diversification</h3>
-            <div>
-                <div class="inputBox">
-                    <label for="speciationRate">Speciation</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.1"
-                        class="tenths"
-                        id="speciationRate"
-                        title="speciation rate"
-                        value="0.00" />
-                </div>
-                <div class="inputBox">
-                    <label for="extinctionRate">Extinction</label>
+                    <label for="extinctionRate">Selective pressure</label>
                     <input
                         type="text"
                         min="0"
@@ -144,6 +96,7 @@
                         title="extinction rate"
                         value="0.00" />
                 </div>
+                <br />
                 <svg id="svg"></svg>
             </div>
         </div>

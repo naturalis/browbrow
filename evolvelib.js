@@ -15,13 +15,11 @@ Evolver.prototype.rand = function () {
 };
 
 // mutates a parameter
-Evolver.prototype.mutate = function ( individual, trait, min, max, id, competitors ) {
+Evolver.prototype.mutate = function ( individual, trait, min, max, id ) {
     var value = individual.getTraitValue(trait);
     var rate  = this.ui.getParam(id + 'Heritability');
-    var comp  = this.ui.getParam(id + 'Competition');
     var stdev = ( max - min ) * ( rate );
     var newValue = this.rand() * stdev + value;
-    var invComp = comp == 0 ? Infinity : 1/comp;
 
     // bounce back from upper
     if ( newValue > max ) {
@@ -33,72 +31,51 @@ Evolver.prototype.mutate = function ( individual, trait, min, max, id, competito
         newValue = min + ( min - newValue );
     }
 
-    // check if we are approaching someone else's trait value. if we are, then the
-    // approach will be a value above 1, else below 1. Let's say the new value gets
-    // us ten times as close to a competitor than the old value, then the approach
-    // is 10. We will only accept this if that value is still smaller than the inverse
-    // of the competition. So if the competition is ~0.0 then the inverse will be
-    // infinity, hence all approaches will be accepted because they'll always we
-    // smaller than infinity. If competition is ~1.0 then no approach will be accepted
-    var approach = this.competitionGradient(individual,trait,newValue,competitors);
-    if ( ( approach < invComp ) || ( comp < Math.random() ) ) {
-        return Math.round(newValue);
-    }
-    else {
-        return this.mutate(individual, trait, min, max, id, competitors);
-    }
-};
-
-Evolver.prototype.competitionGradient = function(individual,trait,newValue,competitors) {
-    var value = individual.getTraitValue(trait);
-
-    // compute all distances to the old value and to the new value
-    var oldDistances = [];
-    var newDistances = [];
-    for ( var i = 0; i < competitors.length; i++ ) {
-
-        // don't compare with self
-        if ( individual.id != competitors[i].id ) {
-            oldDistances.push(Math.abs(value - competitors[i].getTraitValue(trait)));
-            newDistances.push(Math.abs(newValue - competitors[i].getTraitValue(trait)));
-        }
-    }
-
-    // we have more than 1 individual
-    if ( oldDistances.length > 0 ) {
-
-        // sort numerically in increasing order
-        var numerically = function(a,b) {
-            return a - b;
-        };
-        oldDistances.sort(numerically);
-        newDistances.sort(numerically);
-
-        // return ratio of distances. An approach would result in a ratio > 1.
-        return oldDistances[0] / newDistances[0];
-    }
-    return 0;
+    return Math.round(newValue);
 };
 
 // evolve one generation
 Evolver.prototype.evolve = function () {
     var leaves = this.tree.root.getLeaves();
 
-    // decide whether to speciate
-    if ( Math.random() < this.ui.getParam('speciationRate') ) {
-        var i = Math.floor( Math.random() * leaves.length );
-        var children = leaves[i].speciate(this.generation);
-        leaves.splice(i,1);
-        leaves.push(children[0]);
-        leaves.push(children[1]);
+    // precompute fitness
+    for ( var i = 0; i < leaves.length; i++ ) {
+        leaves[i].updateFitness(this.ui);
     }
 
-    // decide whether to extinguish
+    // sort in descending order so that least fit come first
+    leaves.sort(function(a,b){
+        if (a.getFitness() > b.getFitness()) {
+            return -1;
+        }
+        if (a.getFitness() < b.getFitness()) {
+            return 1;
+        }
+        return 0;
+    });
+
+    // decide whether to reproduce
+    if ( Math.random() < this.ui.getParam('speciationRate') ) {
+        var fittest = leaves.length - 1;
+        var children = leaves[fittest].speciate(this.generation);
+        leaves.splice(fittest,1);
+        for ( var j = 0; j < children.length; j++ ) {
+            children[j].color[0] = this.mutate(children[j],'color_r',0,255,'color');
+            children[j].color[1] = this.mutate(children[j],'color_g',0,255,'color');
+            children[j].color[2] = this.mutate(children[j],'color_b',0,255,'color');
+            leaves.push(children[j]);
+            console.log("birth");
+        }
+    }
+
+    // decide whether to die
     if ( Math.random() < this.ui.getParam('extinctionRate') ) {
         if ( leaves.length > 1 ) {
-            var i = Math.floor( Math.random() * leaves.length );
-            if ( leaves[i].extinguish() ) {
-                leaves.splice(i,1);
+
+            // extinguish the least fit
+            if ( leaves[0].extinguish() ) {
+                leaves.splice(0,1);
+                console.log("death");
             }
         }
     }
@@ -111,60 +88,13 @@ Evolver.prototype.evolve = function () {
         var l = leaves[i];
         l.gen = this.generation; // update
 
-        /*
-        What needs to happen here?
-
-        1. make it so that for every trait we survey all the directions
-           in which we can evolve, i.e. any moves in the direction of
-           a competing population are disallowed, we only retain a set
-           of all possible moves.
-
-        2. among the possible, non-competing moves, assess which of these
-           might cause a reduction in fitness (for now this only applies
-           to positions on the canvas) and disallow these moves.
-
-        3. for the remaining moves, randomly draw one. Presumably every
-           move (in euclidean space, in HSL space, in "radius space") can
-           be rephrased as a directional vector so that we not only draw
-           which vector to use (uniformly) but also the vector length.
-
-         */
-
-        // mutate colors
-        l.color[0] = this.mutate(l,'color_r',0,255,'color',leaves);
-        l.color[1] = this.mutate(l,'color_g',0,255,'color',leaves);
-        l.color[2] = this.mutate(l,'color_b',0,255,'color',leaves);
-
-        // mutate radius
-        l.radius = this.mutate(l,'radius',5,40,'radius',leaves);
-
         // mutate position
-        this.evolvePosition(l,leaves);
+        l.pos[0] = this.mutate(l,'pos_x',0,window.innerWidth,'position');
+        l.pos[1] = this.mutate(l,'pos_y',0,window.innerHeight,'position');
 
         // draw the lineage
         this.ui.drawLineage(l);
     }
     this.ui.drawTree(this.tree.root,this.generation);
     this.generation++;
-};
-
-Evolver.prototype.evolvePosition = function(l,leaves) {
-    var currentFitness = this.ui.getFitness(l.pos[0], l.pos[1]);
-    var propX = this.mutate(l,'pos_x',0,window.innerWidth,'position',leaves);
-    var propY = this.mutate(l,'pos_y',0,window.innerHeight,'position',leaves);
-    var newFitness = this.ui.getFitness(propX,propY);
-    var moves = 0;
-    while( newFitness < currentFitness || moves < 10 ) {
-        var candidateX = this.mutate(l,'pos_x',0,window.innerWidth,'position',leaves);
-        var candidateY = this.mutate(l,'pos_y',0,window.innerHeight,'position',leaves);
-        var candidateFitness = this.ui.getFitness(candidateX,candidateY);
-        if ( candidateFitness > newFitness ) {
-        	propX = candidateX;
-        	propY = candidateY;
-        }
-        newFitness = candidateFitness;
-        moves++;
-    }
-    l.pos[0] = propX;
-    l.pos[1] = propY;
 };
