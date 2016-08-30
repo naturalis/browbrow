@@ -52,12 +52,20 @@ var UI = function() {
 UI.prototype.drawLandscape = function(canvas,ctx){
 	var image = ctx.createImageData(canvas.width, canvas.height);
 	var data = image.data;
+    var threshold = 0.05;
 	noise.seed(Math.random());
 	var scale = this.getParam('patchiness');
 	for ( var x = 0; x < canvas.width; x++ ) {
 		for ( var y = 0; y < canvas.height; y++ ) {
 			var value = Math.abs(noise.simplex2(x / scale, y / scale));
-			value *= 256;
+
+            // clip
+            if ( value < threshold ) {
+                value = 0;
+            }
+            else {
+                value = 255;
+            }
 			var cell = (x + y * canvas.width) * 4;
 			data[cell + 0] = data[cell + 1] = data[cell + 2] = value;
 			data[cell + 3] = 255; // alpha.			
@@ -69,32 +77,51 @@ UI.prototype.drawLandscape = function(canvas,ctx){
 };
 
 UI.prototype.colorLandscape = function(canvas,ctx){
-
+    var imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    var ncolors = this.getParam('habitatColors');
+    var ci = 1;
+    for ( var x = 0; x < imageData.width; x++ ) {
+        for ( var y = 0; y < imageData.height; y++ ) {
+            var cell = ( x + y * imageData.width ) * 4;
+            if ( imageData.data[cell+0] === 255 && imageData.data[cell+1] === 255 && imageData.data[cell+2] === 255 ) {
+                var rgb = this.hslToRgb( ci / ncolors, 1, 0.5 );
+                this.colorArea(ctx,x,y,rgb,imageData);
+                if ( ci < ncolors ) {
+                    ci++;
+                }
+                else {
+                    ci = 1;
+                }
+            }
+        }
+    }
 };
 
-UI.prototype.colorArea = function(canvas,ctx,startX,startY,rgb){
+UI.prototype.colorArea = function(ctx,startX,startY,rgb,imageData){
 
     // adapted from http://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
-	var canvasWidth = canvas.width;
-	var canvasHeight = canvas.height;
-    var colorLayer = ctx.getImageData(0,0,canvasWidth,canvasHeight);
-    var drawingBoundTop = 0;
 	var pixelStack = [[startX, startY]];
-	while(pixelStack.length) {
-		var newPos, x, y, pixelPos, reachLeft, reachRight;
-		newPos = pixelStack.pop();
-		x = newPos[0];
-		y = newPos[1];
-  		pixelPos = (y*canvasWidth + x) * 4;
-		while( y-- >= drawingBoundTop && matchStartColor(pixelPos) ) {
-			pixelPos -= canvasWidth * 4;
+	while( pixelStack.length ) {
+		var reachLeft, reachRight; // booleans
+		var newPos = pixelStack.pop();
+		var x = newPos[0];
+		var y = newPos[1];
+  		var pixelPos = ( y * imageData.width + x ) * 4;
+
+        // move up to top or boundary
+		while( y-- >= 0 && matchStartColor(pixelPos) ) {
+			pixelPos -= imageData.width * 4;
 		}
-		pixelPos += canvasWidth * 4;
+		pixelPos += imageData.width * 4;
 		++y;
 		reachLeft = false;
 		reachRight = false;
-		while( y++ < canvasHeight - 1 && matchStartColor(pixelPos) ){
+
+        // move down column
+		while( y++ < imageData.height - 1 && matchStartColor(pixelPos) ){
 			colorPixel(pixelPos);
+
+            // space on the left
 			if( x > 0 ) {
 				if( matchStartColor(pixelPos - 4) ) {
 					if( !reachLeft ) {
@@ -105,8 +132,10 @@ UI.prototype.colorArea = function(canvas,ctx,startX,startY,rgb){
 				else if(reachLeft) {
 					reachLeft = false;
 				}
-			}	
-			if( x < canvasWidth - 1 ) {
+			}
+
+            // space on the right
+			if( x < imageData.width - 1 ) {
 				if( matchStartColor( pixelPos + 4 ) ) {
 					if( !reachRight ) {
 						pixelStack.push([x + 1, y]);
@@ -117,24 +146,33 @@ UI.prototype.colorArea = function(canvas,ctx,startX,startY,rgb){
 					reachRight = false;
 				}
 			}			
-			pixelPos += canvasWidth * 4;
+			pixelPos += imageData.width * 4;
 		}
 	}
-	ctx.putImageData(colorLayer, 0, 0);
+	ctx.putImageData(imageData, 0, 0);
   
 	function matchStartColor(pixelPos) {
-		var r = colorLayer.data[pixelPos+0];
-		var g = colorLayer.data[pixelPos+1];	
-		var b = colorLayer.data[pixelPos+2];
-        return (r == 0 && g == 0 && b == 0);
-		//return (r == startR && g == startG && b == startB);
+		var r = imageData.data[pixelPos+0];
+		var g = imageData.data[pixelPos+1];
+		var b = imageData.data[pixelPos+2];
+        if ( r === 255 && g === 255 && b === 255 ) {
+            return true;
+        }
+        if ( r === rgb[0] && g === rgb[1] && b == rgb[2] ) {
+            return false;
+        }
+        if ( r === 0 && g === 0 && b === 0 ) {
+            return false;
+        }
+        console.log("R="+r+" G="+g+" B="+b);
+        return false;
 	}
 
 	function colorPixel(pixelPos) {
-		colorLayer.data[pixelPos+0] = rgb[0];
-		colorLayer.data[pixelPos+1] = rgb[1];
-		colorLayer.data[pixelPos+2] = rgb[2];
-		colorLayer.data[pixelPos+3] = 255;
+		imageData.data[pixelPos+0] = rgb[0];
+		imageData.data[pixelPos+1] = rgb[1];
+		imageData.data[pixelPos+2] = rgb[2];
+		imageData.data[pixelPos+3] = 255;
 	}
 
 };
