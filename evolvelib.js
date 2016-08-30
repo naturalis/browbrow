@@ -73,9 +73,12 @@ Evolver.prototype.evolve = function () {
         if ( leaves.length > 1 ) {
 
             // extinguish the least fit
-            if ( leaves[0].extinguish() ) {
-                leaves.splice(0,1);
-                console.log("death");
+            for ( var j = 0; j < leaves.length; j++ ) {            
+				if ( leaves[j].parent && leaves[j].parent.parent && leaves[j].extinguish() ) {
+					leaves.splice(j,1);
+					console.log("death");
+					break;
+				}
             }
         }
     }
