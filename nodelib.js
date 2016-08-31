@@ -116,7 +116,7 @@ Node.prototype.reproduce = function(generation) {
     return this.children;
 };
 
-Node.prototype.die = function () {
+Node.prototype.die = function (tree) {
 
     // only non-root leaves can be extinguished
     if ( this.parent ) {
@@ -144,6 +144,12 @@ Node.prototype.die = function () {
             this.parent.parent.children = [ otherChild, otherSibling ];
             otherChild.parent = this.parent.parent;
             otherSibling.parent = this.parent.parent;
+            return true;
+        }
+        else {
+            this.parent.children = [];
+            otherChild.parent = undefined;
+            tree.root = otherChild;
             return true;
         }
     }

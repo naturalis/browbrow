@@ -15,9 +15,9 @@ Evolver.prototype.rand = function () {
 };
 
 // mutates a parameter
-Evolver.prototype.mutate = function ( individual, trait, min, max, id ) {
+Evolver.prototype.mutate = function ( individual, trait, min, max, id, rate ) {
     var value = individual.getTraitValue(trait);
-    var rate  = this.ui.getParam(id + 'Heritability');
+    //var rate  = this.ui.getParam(id + 'Heritability');
     var stdev = ( max - min ) * ( rate );
     var newValue = this.rand() * stdev + value;
 
@@ -84,13 +84,14 @@ Evolver.prototype.evolve = function () {
         // kill focal leaf
         killProb = this.rand() * 1/6 + 0.5;
         fit = leaves[i].getFitness();
-        if ( killProb > fit && killProb < killProbScaler && leaves[i].die() ) {
+        if ( killProb > fit && killProb < killProbScaler && leaves[i].die(this.tree) ) {
             leaves.splice(i,1);
             console.log("Death befalls the weaker of the population, fitness=" + fit);
         }
     }
 
     // iterate over leaves to reproduce
+    var colorRate  = this.ui.getParam('colorHeritability');
     for ( i = 0; i < leaves.length; i++ ) {
         birthProb = this.rand() * 1/6 + 0.5;
         fit = leaves[i].getFitness();
@@ -102,9 +103,9 @@ Evolver.prototype.evolve = function () {
             leaves.push(children[1]);
 
             // mutate the phenotype of the child
-            children[1].color[0] = this.mutate(children[1],'color_r',0,255,'color');
-            children[1].color[1] = this.mutate(children[1],'color_g',0,255,'color');
-            children[1].color[2] = this.mutate(children[1],'color_b',0,255,'color');
+            children[1].color[0] = this.mutate(children[1],'color_r',0,255,'color', colorRate);
+            children[1].color[1] = this.mutate(children[1],'color_g',0,255,'color', colorRate);
+            children[1].color[2] = this.mutate(children[1],'color_b',0,255,'color', colorRate);
         }
     }
 
@@ -112,13 +113,14 @@ Evolver.prototype.evolve = function () {
     this.ui.fade();
 
     // iterate over lineages, mutate
+    var posRate = this.ui.getParam('positionHeritability');
     for ( var i = 0; i < leaves.length; i++ ) {
         var l = leaves[i];
         l.gen = this.generation; // update
 
         // mutate position
-        l.pos[0] = this.mutate(l,'pos_x',0,window.innerWidth,'position');
-        l.pos[1] = this.mutate(l,'pos_y',0,window.innerHeight,'position');
+        l.pos[0] = this.mutate(l,'pos_x',0,window.innerWidth,'position', posRate);
+        l.pos[1] = this.mutate(l,'pos_y',0,window.innerHeight,'position', posRate);
 
         // draw the lineage
         this.ui.drawLineage(l);
