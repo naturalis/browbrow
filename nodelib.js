@@ -56,11 +56,14 @@ var Node = function (args) {
     console.log("Instantiated node");
 };
 
-Node.prototype.updateFitness = function(ui) {
-    var pixel = ui.getPixelValue(this.pos[0],this.pos[1]);
-    var hslB = ui.rgbToHsl(pixel[0],pixel[1],pixel[2]); // background
-    var hslP = ui.rgbToHsl(this.color[0],this.color[1],this.color[2]); // phenotype
-    this.fitness = Math.abs(hslB[0]-hslP[0]) + Math.abs(hslB[2]-hslP[2]);
+Node.prototype.computeRawFitness = function(landscape) {
+    var bgP = landscape.getPixelValue(this.pos[0],this.pos[1]);
+    var phP = [ this.color[0], this.color[1], this.color[2] ];
+    return Math.abs(bgP[0]-phP[0]) + Math.abs(bgP[1]-phP[1]) + Math.abs(bgP[2]-phP[2]);
+};
+
+Node.prototype.setFitness = function(fitness) {
+    this.fitness = fitness;
 };
 
 Node.prototype.getFitness = function () {
@@ -96,7 +99,7 @@ Node.prototype.getLeaves = function () {
     return leaves;
 };
 
-Node.prototype.speciate = function(generation) {
+Node.prototype.reproduce = function(generation) {
 
     // create first child
     var child1 = new Node(this);
@@ -113,7 +116,7 @@ Node.prototype.speciate = function(generation) {
     return this.children;
 };
 
-Node.prototype.extinguish = function () {
+Node.prototype.die = function () {
 
     // only non-root leaves can be extinguished
     if ( this.parent ) {

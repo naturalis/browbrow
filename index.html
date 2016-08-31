@@ -42,11 +42,11 @@
                     <input
                             type="text"
                             min="0"
-                            max="0.1"
+                            max="0.2"
                             class="tenths"
                             id="speciationRate"
                             title="speciation rate"
-                            value="0.00" />
+                            value="0" />
                 </div>
                 <!--br />
                 <h3>Habitat</h3-->
@@ -77,26 +77,31 @@
                 <div class="inputBox">
                     <label for="colorHeritability">Mutation rate</label>
                     <input
-                            type="text"
-                            min="0"
-                            max="0.10"
-                            class="hundredths"
-                            id="colorHeritability"
-                            title="color heritability"
-                            value="0.000" />
+                        type="text"
+                        min="0"
+                        max="0.10"
+                        class="hundredths"
+                        id="colorHeritability"
+                        title="color heritability"
+                        value="0.000" />
                 </div>
                 <div class="inputBox">
                     <label for="extinctionRate">Selective pressure</label>
                     <input
                         type="text"
                         min="0"
-                        max="0.1"
+                        max="0.2"
                         class="tenths"
                         id="extinctionRate"
                         title="extinction rate"
-                        value="0.00" />
+                        value="0" />
                 </div>
                 <br />
+                <div style="text-align: right">
+                    <label for="drawTree">Update tree</label>
+                    <div id="drawTree"></div>
+                </div>
+                <br /><br />
                 <svg id="svg"></svg>
             </div>
         </div>

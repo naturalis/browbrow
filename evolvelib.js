@@ -38,12 +38,16 @@ Evolver.prototype.mutate = function ( individual, trait, min, max, id ) {
 Evolver.prototype.evolve = function () {
     var leaves = this.tree.root.getLeaves();
 
-    // precompute fitness
-    for ( var i = 0; i < leaves.length; i++ ) {
-        leaves[i].updateFitness(this.ui);
+    // pre-compute raw fitness
+    var i, fit, killProb, birthProb, children;
+    var birthProbScaler = this.ui.getParam('speciationRate');
+    var killProbScaler = this.ui.getParam('extinctionRate');
+    var drawTree = this.ui.getBoolean('drawTree');
+    for ( i = 0; i < leaves.length; i++ ) {
+        leaves[i].setFitness(leaves[i].computeRawFitness(this.ui));
     }
 
-    // sort in descending order so that least fit come first
+    // sort by fitness, i.e. descending raw values
     leaves.sort(function(a,b){
         if (a.getFitness() > b.getFitness()) {
             return -1;
@@ -54,32 +58,53 @@ Evolver.prototype.evolve = function () {
         return 0;
     });
 
-    // decide whether to reproduce
-    if ( Math.random() < this.ui.getParam('speciationRate') ) {
-        var fittest = leaves.length - 1;
-        var children = leaves[fittest].speciate(this.generation);
-        leaves.splice(fittest,1);
-        for ( var j = 0; j < children.length; j++ ) {
-            children[j].color[0] = this.mutate(children[j],'color_r',0,255,'color');
-            children[j].color[1] = this.mutate(children[j],'color_g',0,255,'color');
-            children[j].color[2] = this.mutate(children[j],'color_b',0,255,'color');
-            leaves.push(children[j]);
-            console.log("birth");
+    // transform fitness to be relative to rank
+    for ( i = 0; i < leaves.length; i++ ) {
+        if ( i==0 ) {
+            if ( leaves.length == 1 ) {
+                fit = 1;
+            }
+            else {
+                fit = 0;
+            }
+        }
+        else {
+            fit = i / (leaves.length - 1);
+        }
+        leaves[i].setFitness(fit);
+    }
+
+    // iterate over leaves to kill
+    for ( i = 0; i < leaves.length; i++ ) {
+
+        // can't kill them all
+        if ( leaves.length <= 1 )
+            break;
+
+        // kill focal leaf
+        killProb = this.rand() * 1/6 + 0.5;
+        fit = leaves[i].getFitness();
+        if ( killProb > fit && killProb < killProbScaler && leaves[i].die() ) {
+            leaves.splice(i,1);
+            console.log("Death befalls the weaker of the population, fitness=" + fit);
         }
     }
 
-    // decide whether to die
-    if ( Math.random() < this.ui.getParam('extinctionRate') ) {
-        if ( leaves.length > 1 ) {
+    // iterate over leaves to reproduce
+    for ( i = 0; i < leaves.length; i++ ) {
+        birthProb = this.rand() * 1/6 + 0.5;
+        fit = leaves[i].getFitness();
+        if ( birthProb < fit && birthProb < birthProbScaler ) {
+            console.log("The stronger of the population is blessed with a child=" + fit);
+            children = leaves[i].reproduce(this.generation);
+            leaves.splice(i,1);
+            leaves.push(children[0]);
+            leaves.push(children[1]);
 
-            // extinguish the least fit
-            for ( var j = 0; j < leaves.length; j++ ) {            
-				if ( leaves[j].parent && leaves[j].parent.parent && leaves[j].extinguish() ) {
-					leaves.splice(j,1);
-					console.log("death");
-					break;
-				}
-            }
+            // mutate the phenotype of the child
+            children[1].color[0] = this.mutate(children[1],'color_r',0,255,'color');
+            children[1].color[1] = this.mutate(children[1],'color_g',0,255,'color');
+            children[1].color[2] = this.mutate(children[1],'color_b',0,255,'color');
         }
     }
 
@@ -98,6 +123,7 @@ Evolver.prototype.evolve = function () {
         // draw the lineage
         this.ui.drawLineage(l);
     }
-    this.ui.drawTree(this.tree.root,this.generation);
+    if (drawTree)
+        this.ui.drawTree(this.tree.root,this.generation);
     this.generation++;
 };

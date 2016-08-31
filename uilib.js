@@ -38,6 +38,8 @@ var UI = function() {
     landscapeCanvas.width  = window.innerWidth;
     landscapeCanvas.height = window.innerHeight;    
     var ctx = landscapeCanvas.getContext("2d");
+    this.drawLandscape(landscapeCanvas,ctx);
+    this.colorLandscape(landscapeCanvas,ctx);
     this.landscapeCtx = ctx;
     for ( var i = 0; i < 2; i++ ) {
     	$(lsc[i]).on("slidechange",function(event,ui){
@@ -45,11 +47,19 @@ var UI = function() {
     		self.colorLandscape(landscapeCanvas,ctx);
     	});
     }
+
+    // make checkbox
+    $('#drawTree').replaceWith('<input type="checkbox" id="drawTree" checked="checked" />');
     
     // collect all controls in an accordion
     $("#controls").accordion({ collapsible: true, active: false });
 };
 
+/**
+ * Draws the landscape contours by generating perlin noise and clipping it
+ * @param canvas
+ * @param ctx
+ */
 UI.prototype.drawLandscape = function(canvas,ctx){
 	var image = ctx.createImageData(canvas.width, canvas.height);
 	var data = image.data;
@@ -77,6 +87,13 @@ UI.prototype.drawLandscape = function(canvas,ctx){
 	ctx.putImageData(image, 0, 0);
 };
 
+/**
+ * Colors the patches inside the landscape contours drawn by this.drawLandscape. Iterates through the pixels,
+ * and for every non-contour, unfilled pixel, invokes this.colorArea with one of the number of colors specified
+ * by the habitatColors parameter
+ * @param canvas
+ * @param ctx
+ */
 UI.prototype.colorLandscape = function(canvas,ctx){
     var imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
     var ncolors = this.getParam('habitatColors');
@@ -96,8 +113,17 @@ UI.prototype.colorLandscape = function(canvas,ctx){
             }
         }
     }
+    this.imageData = imageData;
 };
 
+/**
+ * Colors a patch in color rgb, starting at startX,startY
+ * @param ctx
+ * @param startX
+ * @param startY
+ * @param rgb
+ * @param imageData
+ */
 UI.prototype.colorArea = function(ctx,startX,startY,rgb,imageData){
 
     // adapted from http://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
@@ -246,6 +272,9 @@ UI.prototype.colorArea = function(ctx,startX,startY,rgb,imageData){
     return [h, s, l];
 };
 
+/**
+ * Fades the previous generation of individuals on the canvas
+ */
 UI.prototype.fade = function() {
     var imgData = this.evoCtx.getImageData(0,0,window.innerWidth,window.innerHeight);
     var pix = imgData.data;
@@ -255,20 +284,45 @@ UI.prototype.fade = function() {
     this.evoCtx.putImageData(imgData,0,0);
 };
 
+/**
+ * Returns the parameter value supplied by the widget identified by the id argument
+ * @param id
+ * @returns {*|jQuery}
+ */
 UI.prototype.getParam = function(id) {
     return $('#'+id).slider('value');
 };
 
+/**
+ * Returns whether a box is checked
+ * @param id
+ * @returns {*|jQuery}
+ */
+UI.prototype.getBoolean = function(id) {
+    return $('#'+id).is(":checked");
+};
+
+/**
+ * Gets the rgb pixel value of x,y on the landscape canvas
+ * @param x
+ * @param y
+ * @returns {*[]}
+ */
 UI.prototype.getPixelValue = function(x,y) {
-    var imageData = this.landscapeCtx.getImageData(x,y,1,1);
+    var pixelPos = ( y * this.imageData.width + x ) * 4;
 	return [
-        imageData.data[0],
-        imageData.data[1],
-        imageData.data[2],
-        imageData.data[3]
+        this.imageData.data[pixelPos+0],
+        this.imageData.data[pixelPos+1],
+        this.imageData.data[pixelPos+2],
+        this.imageData.data[pixelPos+3]
     ];
 };
 
+/**
+ * Draws the phylogeny subtended by node
+ * @param node
+ * @param depth
+ */
 UI.prototype.drawTree = function(node,depth) {
 
     // make local reference of SVG,
@@ -346,6 +400,10 @@ UI.prototype.drawTree = function(node,depth) {
     });
 };
 
+/**
+ * Draws the branch leading to leaf l
+ * @param l
+ */
 UI.prototype.drawLineage = function(l) {
     this.evoCtx.beginPath();
     this.evoCtx.arc( l.pos[0], l.pos[1], l.radius, 0, 2 * Math.PI, false );
