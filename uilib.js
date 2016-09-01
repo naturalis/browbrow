@@ -52,6 +52,7 @@ var UI = function() {
 
     // make checkbox
     $('#drawTree').replaceWith('<input type="checkbox" id="drawTree" checked="checked" />');
+    $('#drawFade').replaceWith('<input type="checkbox" id="drawFade" checked="checked" />');
     
     // collect all controls in an accordion
     $("#controls").accordion({ collapsible: true, active: false });
@@ -278,12 +279,18 @@ UI.prototype.colorArea = function(ctx,startX,startY,rgb,imageData){
  * Fades the previous generation of individuals on the canvas
  */
 UI.prototype.fade = function() {
-    var imgData = this.evoCtx.getImageData(0,0,window.innerWidth,window.innerHeight);
-    var pix = imgData.data;
-    for ( var i = 0; i < pix.length; i += 4 ) {
-        pix[i+3] *= 0.9;
+    var fade = this.getBoolean('drawFade');
+    if ( fade ) {
+        var imgData = this.evoCtx.getImageData(0, 0, window.innerWidth, window.innerHeight);
+        var pix = imgData.data;
+        for (var i = 0; i < pix.length; i += 4) {
+            pix[i + 3] *= 0.9;
+        }
+        this.evoCtx.putImageData(imgData, 0, 0);
     }
-    this.evoCtx.putImageData(imgData,0,0);
+    else {
+        this.evoCtx.clearRect(0,0, window.innerWidth, window.innerHeight);
+    }
 };
 
 /**
