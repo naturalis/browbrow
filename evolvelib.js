@@ -86,7 +86,7 @@ Evolver.prototype.evolve = function () {
         fit = leaves[i].getFitness();
         if ( killProb > fit && killProb < killProbScaler && leaves[i].die(this.tree) ) {
             leaves.splice(i,1);
-            console.log("Death befalls the weaker of the population, fitness=" + fit);
+            //console.log("Death befalls the weaker of the population, fitness=" + fit);
         }
     }
 
@@ -96,7 +96,7 @@ Evolver.prototype.evolve = function () {
         birthProb = this.rand() * 1/6 + 0.5;
         fit = leaves[i].getFitness();
         if ( birthProb < fit && birthProb < birthProbScaler ) {
-            console.log("The stronger of the population is blessed with a child=" + fit);
+            //console.log("The stronger of the population is blessed with a child=" + fit);
             children = leaves[i].reproduce(this.generation);
             leaves.splice(i,1);
             leaves.push(children[0]);

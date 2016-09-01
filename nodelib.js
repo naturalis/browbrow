@@ -53,7 +53,7 @@ var Node = function (args) {
     // initialize fitness
     this.fitness = 0;
 
-    console.log("Instantiated node");
+    //console.log("Instantiated node");
 };
 
 Node.prototype.computeRawFitness = function(landscape) {
