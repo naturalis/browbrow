@@ -25,7 +25,6 @@
         <div id="controls">
             <h3>Settings</h3>
             <div>
-                <!--h3>Traits</h3-->
                 <div class="inputBox">
                     <label for="positionHeritability">Dispersal</label>
                     <input
@@ -35,7 +34,7 @@
                         class="hundredths"
                         id="positionHeritability"
                         title="position heritability"
-                        value="0.000" />
+                        value="0.003" />
                 </div>
                 <div class="inputBox">
                     <label for="speciationRate">Fertility</label>
@@ -46,7 +45,7 @@
                             class="tenths"
                             id="speciationRate"
                             title="speciation rate"
-                            value="0" />
+                            value="0.15" />
                 </div>
                 <!--br />
                 <h3>Habitat</h3-->
@@ -59,7 +58,7 @@
                         class="ones"
                         id="patchiness"
                         title="patchiness"
-                        value="500" />
+                        value="700" />
             	</div>
             	<div class="inputBox">
             		<label for="habitatColors">Habitat colors</label>
@@ -70,7 +69,7 @@
                         class="ones"                        
                         id="habitatColors"
                         title="habitat colors"
-                        value="2" />
+                        value="3" />
             	</div>
                 <!--br />
                 <h3>Evolution</h3-->
@@ -83,7 +82,7 @@
                         class="hundredths"
                         id="colorHeritability"
                         title="color heritability"
-                        value="0.000" />
+                        value="0.1" />
                 </div>
                 <div class="inputBox">
                     <label for="extinctionRate">Selective pressure</label>
@@ -94,7 +93,7 @@
                         class="tenths"
                         id="extinctionRate"
                         title="extinction rate"
-                        value="0" />
+                        value="0.15" />
                 </div>
                 <br />
                 <div style="text-align: right">
@@ -103,6 +102,8 @@
                 </div>
                 <br /><br />
                 <svg id="svg"></svg>
+                <br /><br />
+                <h3>&rarr;<a href="#" onclick="document.location.reload(true);">Restart</a></h3>
             </div>
         </div>
         <canvas id="evolver"></canvas>

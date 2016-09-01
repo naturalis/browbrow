@@ -21,13 +21,15 @@ var UI = function() {
     	if ( inputs[i].className === 'ones' ) 
 	    	increments = 1;
     	var id  = inputs[i].id;
-    	var min = parseFloat($(inputs[i]).attr('min'));
-    	var max = parseFloat($(inputs[i]).attr('max'));
+    	var min   = parseFloat($(inputs[i]).attr('min'));
+    	var max   = parseFloat($(inputs[i]).attr('max'));
+        var value = parseFloat($(inputs[i]).attr('value'));
     	$(inputs[i]).replaceWith('<div id="'+id+'">');
     	$('#'+id).slider({
     		min: min,
     		max: max,
-    		step: increments
+    		step: increments,
+            value: value
     	});
     }
     
