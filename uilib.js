@@ -56,7 +56,6 @@ var UI = function() {
     
     // collect all controls in an accordion
     $("#controls").accordion({ collapsible: true, active: false });
-    $("#widgets" ).accordion({ collapsible: true, active: false });
 };
 
 /**
