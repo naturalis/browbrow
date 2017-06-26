@@ -418,7 +418,7 @@ UI.prototype.drawLineage = function(l) {
     this.evoCtx.arc( l.pos[0], l.pos[1], l.radius, 0, 2 * Math.PI, false );
     this.evoCtx.fillStyle = l.getRGB();
     this.evoCtx.fill();
-    this.evoCtx.lineWidth = 0.5;
+    this.evoCtx.lineWidth = 1.0;
     this.evoCtx.strokeStyle = '#000000';
     this.evoCtx.stroke();
 };
