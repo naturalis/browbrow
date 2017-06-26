@@ -24,7 +24,7 @@
         <canvas id="landscape"></canvas>
         <div id="controls">
             <h3>Settings</h3>
-            <div>
+            <div id="widgets">
                 <div class="inputBox">
                     <label for="positionHeritability">Dispersal</label>
                     <input
@@ -50,7 +50,7 @@
                 <!--br />
                 <h3>Habitat</h3-->
             	<div class="inputBox">
-            		<label for="patchiness">Habitat size</label>
+            	    <label for="patchiness">Habitat size</label>
                     <input
                         type="text"
                         min="100"
@@ -61,7 +61,7 @@
                         value="700" />
             	</div>
             	<div class="inputBox">
-            		<label for="habitatColors">Habitat colors</label>
+            	    <label for="habitatColors">Habitat colors</label>
                     <input
                         type="text"
                         min="2"
@@ -71,8 +71,6 @@
                         title="habitat colors"
                         value="3" />
             	</div>
-                <!--br />
-                <h3>Evolution</h3-->
                 <div class="inputBox">
                     <label for="colorHeritability">Mutation rate</label>
                     <input
@@ -102,6 +100,8 @@
                     <label for="drawFade">Fade previous</label>
                     <div id="drawFade"></div>
                 </div>
+	    </div>
+	    <div>
                 <br /><br />
                 <svg id="svg"></svg>
                 <br /><br />
