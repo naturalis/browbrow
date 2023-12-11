@@ -25,28 +25,6 @@
         <div id="controls">
             <h3>Settings</h3>
             <div>
-                <div class="inputBox">
-                    <label for="positionHeritability">Dispersal</label>
-                    <input
-                        type="text"
-                        min="0"
-                        max="0.01"
-                        class="hundredths"
-                        id="positionHeritability"
-                        title="position heritability"
-                        value="0.003" />
-                </div>
-                <div class="inputBox">
-                    <label for="speciationRate">Fertility</label>
-                    <input
-                            type="text"
-                            min="0"
-                            max="0.2"
-                            class="tenths"
-                            id="speciationRate"
-                            title="speciation rate"
-                            value="0.15" />
-                </div>
                 <!--br />
                 <h3>Habitat</h3-->
             	<div class="inputBox">
@@ -74,7 +52,18 @@
                 <!--br />
                 <h3>Evolution</h3-->
                 <div class="inputBox">
-                    <label for="colorHeritability">Mutation rate</label>
+                    <label for="positionHeritability">Dispersal rate</label>
+                    <input
+                        type="text"
+                        min="0"
+                        max="0.01"
+                        class="hundredths"
+                        id="positionHeritability"
+                        title="position heritability"
+                        value="0.003" />
+                </div>		    
+                <div class="inputBox">
+                    <label for="colorHeritability">Evolvability</label>
                     <input
                         type="text"
                         min="0"
@@ -85,7 +74,18 @@
                         value="0.1" />
                 </div>
                 <div class="inputBox">
-                    <label for="extinctionRate">Selective pressure</label>
+                    <label for="speciationRate">Speciation rate λ</label>
+                    <input
+                            type="text"
+                            min="0"
+                            max="0.2"
+                            class="tenths"
+                            id="speciationRate"
+                            title="speciation rate"
+                            value="0.15" />
+                </div>		    
+                <div class="inputBox">
+                    <label for="extinctionRate">Extinction rate μ</label>
                     <input
                         type="text"
                         min="0"
