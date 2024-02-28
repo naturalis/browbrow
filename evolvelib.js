@@ -1,3 +1,12 @@
+/*
+This class models an evolutionary process. The process involves a set of lineages (represented as a Tree object from
+nodelib.js) that are moving through their generations, birthing and dying in the process, in proportion to their
+fitness in relation to the environment. The environment is patchy, such that some lineages are better adapted than
+others, depending on their trait values (color, position) and the properties of the underlying substrate, i.e. how
+well camouflaged are they in that location. This class therefore also manages references to the environment by way
+of the UI.
+*/
+
 var Evolver = function (tree,ui) {
     this.generation = 1;
     this.tree = tree;
@@ -5,16 +14,21 @@ var Evolver = function (tree,ui) {
     console.log("Instantiated evolver");
 };
 
-// draws from an approximately normal distribution with mean 0. to alter
-// the stdev, multiply the output. then add the target mean. the normal
-// distribution is approximated by adding 3 draws from uniform distributions,
-// thereby approaching the Central Limit Theorem.
+/*
+Draws from an approximately normal distribution with mean 0. To alter the stdev, multiply the output, then add the
+target mean. The normal distribution is approximated by adding 3 draws from uniform distributions, thereby approaching
+behavior according to the Central Limit Theorem.
+*/
 Evolver.prototype.rand = function () {
     var value = (Math.random()*2-1) + (Math.random()*2-1) + (Math.random()*2-1);
     return value;
 };
 
-// mutates a parameter
+/*
+Given a focal individual (Node from nodelib.js) and a focal trait, mutates the trait. The trait can have an uppper and
+lower bound (e.g. so that RGB always stays between 1 and 128). The magnitude of the mutation is controlled by a rate
+parameter.
+*/
 Evolver.prototype.mutate = function ( individual, trait, min, max, id, rate ) {
     var value = individual.getTraitValue(trait);
     //var rate  = this.ui.getParam(id + 'Heritability');
@@ -34,7 +48,15 @@ Evolver.prototype.mutate = function ( individual, trait, min, max, id, rate ) {
     return Math.round(newValue);
 };
 
-// evolve one generation
+/*
+Advances the simulation by one generation. This involves the following steps:
+- for all lineages, compute the raw fitness
+- rank the lineages by decreasing fitness
+- rescale the raw fitness values to inverse rank order
+- kill lineages probabilistically inversely proportional to fitness
+- reproduce the survivors, proportional to fitness, and mutate the offspring
+- draw the result
+*/
 Evolver.prototype.evolve = function () {
     var leaves = this.tree.root.getLeaves();
 
@@ -58,7 +80,9 @@ Evolver.prototype.evolve = function () {
         return 0;
     });
 
-    // transform fitness to be relative to rank
+    // Transform fitness to be a value of 1/rank, so that the fittest Node has fitness 1 and the unfittest one
+    // is 1/nleaves. This means that fitness also goes down as population size goes up and so there is more
+    // death in larger populations.
     for ( i = 0; i < leaves.length; i++ ) {
         if ( i==0 ) {
             if ( leaves.length == 1 ) {
@@ -103,16 +127,19 @@ Evolver.prototype.evolve = function () {
             leaves.push(children[1]);
 
             // mutate the phenotype of the child
-            children[1].color[0] = this.mutate(children[1],'color_r',0,255,'color', colorRate);
-            children[1].color[1] = this.mutate(children[1],'color_g',0,255,'color', colorRate);
-            children[1].color[2] = this.mutate(children[1],'color_b',0,255,'color', colorRate);
+            rgb = [ 'color_r', 'color_g', 'color_b' ];
+            for ( j = 0; j <= children.length; j++ ) {
+                for ( k = 0; k <= rgb.length; k++ ) {
+                    children[j].color[k] = this.mutate( children[1], rgb[k], 0, 255, 'color', colorRate );
+                }
+            }
         }
     }
 
     // fade the previous generation
     this.ui.fade();
 
-    // iterate over lineages, mutate
+    // iterate over lineages, mutate the position
     var posRate = this.ui.getParam('positionHeritability');
     for ( var i = 0; i < leaves.length; i++ ) {
         var l = leaves[i];
